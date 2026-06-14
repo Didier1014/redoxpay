@@ -18,21 +18,111 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       { count: products },
       { count: withdrawals },
       { data: vol },
+      { data: fees },
+      { data: balances },
+      { data: wdPending },
+      { data: wdTotal },
+      { data: profileDates },
+      { data: txDates },
     ] = await Promise.all([
       supabaseAdmin.from("profiles").select("*", { count: "exact", head: true }),
       supabaseAdmin.from("transactions").select("*", { count: "exact", head: true }),
       supabaseAdmin.from("products").select("*", { count: "exact", head: true }),
       supabaseAdmin.from("withdrawals").select("*", { count: "exact", head: true }),
       supabaseAdmin.from("transactions").select("amount_mzn").eq("status", "paid"),
+      supabaseAdmin.from("transactions").select("fee_mzn").eq("status", "paid"),
+      supabaseAdmin.from("profiles").select("balance_mzn"),
+      supabaseAdmin.from("withdrawals").select("amount_mzn").eq("status", "pending"),
+      supabaseAdmin.from("withdrawals").select("amount_mzn"),
+      supabaseAdmin.from("profiles").select("created_at"),
+      supabaseAdmin.from("transactions").select("created_at,fee_mzn,amount_mzn,status"),
     ]);
-    const total = (vol ?? []).reduce((a: number, r: any) => a + Number(r.amount_mzn || 0), 0);
+
+    const totalVolume = (vol ?? []).reduce((a: number, r: any) => a + Number(r.amount_mzn || 0), 0);
+    const totalProfit = (fees ?? []).reduce((a: number, r: any) => a + Number(r.fee_mzn || 0), 0);
+    const totalBalance = (balances ?? []).reduce((a: number, r: any) => a + Number(r.balance_mzn || 0), 0);
+    const pendingWd = (wdPending ?? []).reduce((a: number, r: any) => a + Number(r.amount_mzn || 0), 0);
+    const totalWd = (wdTotal ?? []).reduce((a: number, r: any) => a + Number(r.amount_mzn || 0), 0);
+
+    // User signup timeline (daily)
+    const userGrowth: Record<string, number> = {};
+    (profileDates ?? []).forEach((p: any) => {
+      const day = new Date(p.created_at).toISOString().slice(0, 10);
+      userGrowth[day] = (userGrowth[day] || 0) + 1;
+    });
+
+    // Revenue timeline (daily) and new transactions
+    const revenueGrowth: Record<string, number> = {};
+    const txTimeline: Record<string, number> = {};
+    (txDates ?? []).forEach((t: any) => {
+      const day = new Date(t.created_at).toISOString().slice(0, 10);
+      if (t.status === "paid") {
+        revenueGrowth[day] = (revenueGrowth[day] || 0) + Number(t.fee_mzn || 0);
+      }
+      txTimeline[day] = (txTimeline[day] || 0) + 1;
+    });
+
+    const last30 = Array.from({ length: 30 }, (_, i) => {
+      const d = new Date(); d.setDate(d.getDate() - (29 - i));
+      return d.toISOString().slice(0, 10);
+    });
+
     return {
       profiles: profiles ?? 0,
       transactions: tx ?? 0,
       products: products ?? 0,
       withdrawals: withdrawals ?? 0,
-      volume_mzn: total,
+      volume_mzn: totalVolume,
+      profit_mzn: totalProfit,
+      user_balance_mzn: totalBalance,
+      pending_withdrawals_mzn: pendingWd,
+      total_withdrawals_mzn: totalWd,
+      // Charts
+      user_growth: last30.map(d => ({ date: d, count: userGrowth[d] || 0 })),
+      revenue_growth: last30.map(d => ({ date: d, value: revenueGrowth[d] || 0 })),
+      tx_timeline: last30.map(d => ({ date: d, count: txTimeline[d] || 0 })),
     };
+  });
+
+export const approveWithdrawal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context, data }: { context: any; data: { id: string } }) => {
+    await requireAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: wd } = await supabaseAdmin
+      .from("withdrawals").select("*").eq("id", data.id).maybeSingle();
+    if (!wd) throw new Error("Saque não encontrado");
+    if (wd.status !== "pending") throw new Error("Saque já foi processado");
+
+    // Deduct from user balance
+    const { data: prof } = await supabaseAdmin
+      .from("profiles").select("balance_mzn").eq("id", wd.user_id).maybeSingle();
+    if (!prof) throw new Error("Utilizador não encontrado");
+    const bal = Number(prof.balance_mzn);
+    if (bal < Number(wd.amount_mzn)) throw new Error("Saldo insuficiente");
+
+    const [uErr, wErr] = await Promise.all([
+      supabaseAdmin.from("profiles")
+        .update({ balance_mzn: Math.round((bal - Number(wd.amount_mzn)) * 100) / 100 })
+        .eq("id", wd.user_id),
+      supabaseAdmin.from("withdrawals")
+        .update({ status: "paid" }).eq("id", data.id),
+    ]);
+    if (uErr.error) throw new Error(uErr.error.message);
+    if (wErr.error) throw new Error(wErr.error.message);
+    return { ok: true };
+  });
+
+export const rejectWithdrawal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context, data }: { context: any; data: { id: string } }) => {
+    await requireAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("withdrawals")
+      .update({ status: "failed" }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 export const listAllProfiles = createServerFn({ method: "GET" })
@@ -63,7 +153,7 @@ export const listAllWithdrawals = createServerFn({ method: "GET" })
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
-      .from("withdrawals").select("*").order("created_at", { ascending: false }).limit(200);
+      .from("withdrawals").select("*, profiles!inner(full_name, business_name)").order("created_at", { ascending: false }).limit(200);
     if (error) throw new Error(error.message);
     return data ?? [];
   });
@@ -74,17 +164,7 @@ export const listAllProducts = createServerFn({ method: "GET" })
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
-      .from("products").select("*, profiles!inner(full_name, business_name, email)").order("created_at", { ascending: false }).limit(200);
+      .from("products").select("*, profiles!inner(full_name, business_name)").order("created_at", { ascending: false }).limit(200);
     if (error) throw new Error(error.message);
     return data ?? [];
-  });
-
-export const updateTransactionStatus = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context, data }: { context: any; data: { id: string; status: string } }) => {
-    await requireAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("transactions").update({ status: data.status }).eq("id", data.id);
-    if (error) throw new Error(error.message);
-    return { ok: true };
   });
