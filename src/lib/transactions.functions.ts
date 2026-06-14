@@ -36,9 +36,9 @@ const checkoutSchema = z.object({
   method: z.enum(["mpesa", "emola", "card"]),
 });
 
-// RLX fees: 11.99% + 11.99 MT per transaction
+// Taxa do comerciante: 15% + 15 MT por transação
 function calcFee(amount: number) {
-  const fee = Math.round((amount * 0.1199 + 11.99) * 100) / 100;
+  const fee = Math.round((amount * 0.15 + 15) * 100) / 100;
   const net = Math.round((amount - fee) * 100) / 100;
   return { fee, net };
 }
