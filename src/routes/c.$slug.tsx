@@ -182,63 +182,68 @@ function CheckoutPage() {
         <span>Oferta por tempo limitado — expira em <Countdown /></span>
       </div>
 
-      <div className="max-w-md mx-auto px-4 py-6 pb-12" ref={cardRef}>
+      <div className="max-w-md mx-auto px-4 py-4" ref={cardRef} style={{ minHeight: "calc(100vh - 48px)" }}>
         <div className="bg-white rounded-2xl overflow-hidden border" style={{ borderColor: "rgba(148,163,184,0.15)", boxShadow: "0 2px 20px rgba(0,0,0,0.04)" }}>
-          {product.cover_url && (
-            <div className="w-full h-56 overflow-hidden bg-gray-100">
-              <img src={product.cover_url} alt={product.name} className="w-full h-full object-cover" />
-            </div>
-          )}
-
-          <div className="p-5 space-y-5">
-            <div>
-              <h1 className="text-lg font-extrabold tracking-tight leading-tight text-gray-900">{product.name}</h1>
-              {product.description && <p className="text-sm text-gray-400 mt-1">{product.description}</p>}
-              <div className="flex items-center gap-1.5 mt-2 text-xs font-medium" style={{ color: "#3b82f6" }}>
-                <Heart className="h-3.5 w-3.5" fill="#3b82f6" />
-                <span><PurchaseCounter /> compras</span>
+          <div className="p-4 space-y-3">
+            {product.cover_url && (
+              <div className="flex items-center gap-3 pb-2">
+                <img src={product.cover_url} alt={product.name} className="h-14 w-14 rounded-xl object-cover border border-gray-100" />
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-base font-extrabold tracking-tight leading-tight text-gray-900 truncate">{product.name}</h1>
+                  {product.description && <p className="text-xs text-gray-400 truncate">{product.description}</p>}
+                  <div className="flex items-center gap-1 mt-0.5 text-[11px] font-medium" style={{ color: "#3b82f6" }}>
+                    <Heart className="h-3 w-3" fill="#3b82f6" />
+                    <span><PurchaseCounter /> compras</span>
+                  </div>
+                </div>
               </div>
+            )}
+            {!product.cover_url && (
+              <div>
+                <h1 className="text-base font-extrabold tracking-tight text-gray-900">{product.name}</h1>
+                {product.description && <p className="text-xs text-gray-400 mt-0.5">{product.description}</p>}
+                <div className="flex items-center gap-1 mt-1 text-[11px] font-medium" style={{ color: "#3b82f6" }}>
+                  <Heart className="h-3 w-3" fill="#3b82f6" />
+                  <span><PurchaseCounter /> compras</span>
+                </div>
+              </div>
+            )}
+
+            <div className="rounded-lg px-3.5 py-2.5 flex items-center justify-between" style={{ background: "linear-gradient(135deg, rgba(34,197,94,0.04), rgba(34,197,94,0.08))" }}>
+              <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Total a pagar</span>
+              <span className="text-xl font-black tracking-tight text-gray-900">{fmt(price)}</span>
             </div>
 
-            <div className="rounded-xl p-4 flex items-center justify-between" style={{ background: "linear-gradient(135deg, rgba(34,197,94,0.04), rgba(34,197,94,0.08))" }}>
-              <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Total a pagar</span>
-              <span className="text-2xl font-black tracking-tight text-gray-900">{fmt(price)}</span>
-            </div>
-
-            <div className="border-t" style={{ borderColor: "rgba(148,163,184,0.15)" }} />
-
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-gray-500">Nome completo *</Label>
+            <div className="space-y-1.5">
+              <Label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">Nome completo *</Label>
               <Input value={form.customer_name} onChange={(e) => setForm({ ...form, customer_name: e.target.value })}
                 maxLength={120} placeholder="Seu nome"
-                className="border-[1.5px] border-gray-200 rounded-xl py-3 px-3.5 text-[15px] font-medium placeholder:text-gray-300 focus:border-blue-500 focus:ring-[3px] focus:ring-blue-500/10 transition-all" />
+                className="border-[1.5px] border-gray-200 rounded-xl py-2.5 px-3 text-sm font-medium placeholder:text-gray-300 focus:border-blue-500 focus:ring-[3px] focus:ring-blue-500/10 transition-all" />
             </div>
 
-            <div className="border-t" style={{ borderColor: "rgba(148,163,184,0.15)" }} />
-
-            <div className="space-y-2.5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Deseja pagar com:</p>
-              <div className="grid grid-cols-2 gap-2.5">
+            <div className="space-y-1.5">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">Deseja pagar com:</p>
+              <div className="grid grid-cols-2 gap-2">
                 <button onClick={() => setMethod("mpesa")} type="button"
-                  className="relative py-3.5 px-4 rounded-xl border-[1.5px] font-semibold text-[15px] transition-all"
+                  className="relative py-3 px-3 rounded-xl border-[1.5px] font-semibold text-sm transition-all"
                   style={mpesaSelected
                     ? { borderColor: "#ef4444", background: "#fef2f2", color: "#dc2626", boxShadow: "0 0 0 3px rgba(220,38,38,0.08)" }
                     : { borderColor: "rgba(148,163,184,0.3)", background: "#fff", color: "#9ca3af" }}>
                   {mpesaSelected && (
-                    <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "#ef4444" }}>
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                    <span className="absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#ef4444" }}>
+                      <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                     </span>
                   )}
                   M-Pesa
                 </button>
                 <button onClick={() => setMethod("emola")} type="button"
-                  className="relative py-3.5 px-4 rounded-xl border-[1.5px] font-semibold text-[15px] transition-all"
+                  className="relative py-3 px-3 rounded-xl border-[1.5px] font-semibold text-sm transition-all"
                   style={emolaSelected
                     ? { borderColor: "#FF6600", background: "#fff7ed", color: "#e65500", boxShadow: "0 0 0 3px rgba(255,102,0,0.08)" }
                     : { borderColor: "rgba(148,163,184,0.3)", background: "#fff", color: "#9ca3af" }}>
                   {emolaSelected && (
-                    <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "#FF6600" }}>
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                    <span className="absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#FF6600" }}>
+                      <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                     </span>
                   )}
                   e-Mola
@@ -246,18 +251,18 @@ function CheckoutPage() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-gray-500">Número de {method === "mpesa" ? "M-Pesa" : "e-Mola"} *</Label>
+            <div className="space-y-1.5">
+              <Label className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">Número de {method === "mpesa" ? "M-Pesa" : "e-Mola"} *</Label>
               <div className="flex rounded-xl overflow-hidden border-[1.5px] border-gray-200 focus-within:border-blue-500 focus-within:ring-[3px] focus-within:ring-blue-500/10 transition-all">
-                <div className="flex items-center px-3.5 text-sm font-medium text-gray-500 bg-gray-50 border-r border-gray-200">+258</div>
+                <div className="flex items-center px-3 text-sm font-medium text-gray-500 bg-gray-50 border-r border-gray-200">+258</div>
                 <input value={form.customer_phone} onChange={(e) => setForm({ ...form, customer_phone: e.target.value })}
                   placeholder="84 000 0000" maxLength={15}
-                  className="flex-1 px-3.5 py-3 text-[15px] font-medium outline-none placeholder:text-gray-300 bg-white" />
+                  className="flex-1 px-3 py-2.5 text-sm font-medium outline-none placeholder:text-gray-300 bg-white" />
               </div>
             </div>
 
             <button onClick={() => m.mutate()} disabled={m.isPending || !form.customer_name || !form.customer_phone}
-              className="w-full py-4 rounded-xl text-base font-bold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full py-3.5 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               style={{
                 background: methodGradient,
                 boxShadow: m.isPending ? "none" : `0 8px 24px ${methodColor}33`,
@@ -274,19 +279,17 @@ function CheckoutPage() {
               )}
             </button>
 
-            <div className="flex items-center justify-center gap-2 text-xs font-medium text-green-600">
-              <ShieldCheck className="h-4 w-4" />
+            <div className="flex items-center justify-center gap-2 text-[11px] font-medium text-green-600">
+              <ShieldCheck className="h-3.5 w-3.5" />
               Garantia incondicional 7 dias
             </div>
 
-            <div className="flex items-center justify-center gap-4 text-[11px] font-medium text-gray-400">
-              <span className="flex items-center gap-1"><Lock className="h-3 w-3" /> Pagamento seguro</span>
-              <span className="flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> Dados protegidos</span>
+            <div className="flex items-center justify-center gap-4 text-[10px] font-medium text-gray-400">
+              <span className="flex items-center gap-1"><Lock className="h-2.5 w-2.5" /> Pagamento seguro</span>
+              <span className="flex items-center gap-1"><ShieldCheck className="h-2.5 w-2.5" /> Dados protegidos</span>
             </div>
           </div>
         </div>
-
-        <p className="text-center text-xs text-gray-400 mt-6">Powered by REDOX PAY</p>
       </div>
     </div>
   );
