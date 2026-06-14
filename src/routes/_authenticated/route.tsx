@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, Package, Receipt, Wallet, LogOut, Menu, X,
   PlusCircle, BarChart3, Plug, BookOpen, Settings as SettingsIcon, Moon,
-  Users, Link2, QrCode, Code2, MessageSquare, RotateCcw, User, Shield,
+  Users, Link2, Code2, MessageSquare, RotateCcw, User, Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -28,7 +28,7 @@ const navItems = [
   { to: "/dashboard/customers", label: "Clientes", icon: Users, exact: false },
   { to: "/dashboard/products", label: "Produtos", icon: Package, exact: false },
   { to: "/dashboard/payment-links", label: "Links de pagamento", icon: Link2, exact: false },
-  { to: "/dashboard/qr-code", label: "QR Code", icon: QrCode, exact: false },
+
   { to: "/dashboard/subscriptions", label: "Recorrência", icon: RotateCcw, exact: false },
   { to: "/dashboard/sms", label: "SMS", icon: MessageSquare, exact: false },
   { to: "/dashboard/withdrawals", label: "Saques", icon: Wallet, exact: false },
