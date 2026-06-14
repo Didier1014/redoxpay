@@ -38,14 +38,24 @@ export const Route = createFileRoute("/api/public/rlx-webhook")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        // Try matching by external_ref first
-        let { data: tx } = await supabaseAdmin
-          .from("transactions")
-          .select("*")
-          .eq("external_ref", payload.txid)
-          .maybeSingle();
+        // Priority 1: match by tx_id from webhook URL query parameter
+        const url = new URL(request.url);
+        const txIdFromUrl = url.searchParams.get("tx_id");
+        let { data: tx } = txIdFromUrl
+          ? await supabaseAdmin.from("transactions").select("*").eq("id", txIdFromUrl).maybeSingle()
+          : { data: null };
 
-        // Fallback: match by normalised phone for pending transactions
+        // Priority 2: match by external_ref
+        if (!tx) {
+          const result = await supabaseAdmin
+            .from("transactions")
+            .select("*")
+            .eq("external_ref", payload.txid)
+            .maybeSingle();
+          tx = result.data;
+        }
+
+        // Priority 3: fallback — match by normalised phone for pending transactions
         if (!tx) {
           const txidDigits = payload.txid.replace(/\D/g, "");
           const { data: candidates } = await supabaseAdmin
