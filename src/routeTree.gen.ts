@@ -23,7 +23,6 @@ import { Route as AuthenticatedDashboardSubscriptionsRouteImport } from './route
 import { Route as AuthenticatedDashboardSmsRouteImport } from './routes/_authenticated/dashboard.sms'
 import { Route as AuthenticatedDashboardSettingsRouteImport } from './routes/_authenticated/dashboard.settings'
 import { Route as AuthenticatedDashboardReportsRouteImport } from './routes/_authenticated/dashboard.reports'
-import { Route as AuthenticatedDashboardQrCodeRouteImport } from './routes/_authenticated/dashboard.qr-code'
 import { Route as AuthenticatedDashboardProfileRouteImport } from './routes/_authenticated/dashboard.profile'
 import { Route as AuthenticatedDashboardProductsRouteImport } from './routes/_authenticated/dashboard.products'
 import { Route as AuthenticatedDashboardPaymentLinksRouteImport } from './routes/_authenticated/dashboard.payment-links'
@@ -109,12 +108,6 @@ const AuthenticatedDashboardReportsRoute =
     path: '/dashboard/reports',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedDashboardQrCodeRoute =
-  AuthenticatedDashboardQrCodeRouteImport.update({
-    id: '/dashboard/qr-code',
-    path: '/dashboard/qr-code',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedDashboardProfileRoute =
   AuthenticatedDashboardProfileRouteImport.update({
     id: '/dashboard/profile',
@@ -178,7 +171,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/payment-links': typeof AuthenticatedDashboardPaymentLinksRoute
   '/dashboard/products': typeof AuthenticatedDashboardProductsRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
-  '/dashboard/qr-code': typeof AuthenticatedDashboardQrCodeRoute
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/dashboard/sms': typeof AuthenticatedDashboardSmsRoute
@@ -202,7 +194,6 @@ export interface FileRoutesByTo {
   '/dashboard/payment-links': typeof AuthenticatedDashboardPaymentLinksRoute
   '/dashboard/products': typeof AuthenticatedDashboardProductsRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
-  '/dashboard/qr-code': typeof AuthenticatedDashboardQrCodeRoute
   '/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/dashboard/sms': typeof AuthenticatedDashboardSmsRoute
@@ -228,7 +219,6 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/payment-links': typeof AuthenticatedDashboardPaymentLinksRoute
   '/_authenticated/dashboard/products': typeof AuthenticatedDashboardProductsRoute
   '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
-  '/_authenticated/dashboard/qr-code': typeof AuthenticatedDashboardQrCodeRoute
   '/_authenticated/dashboard/reports': typeof AuthenticatedDashboardReportsRoute
   '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/_authenticated/dashboard/sms': typeof AuthenticatedDashboardSmsRoute
@@ -254,7 +244,6 @@ export interface FileRouteTypes {
     | '/dashboard/payment-links'
     | '/dashboard/products'
     | '/dashboard/profile'
-    | '/dashboard/qr-code'
     | '/dashboard/reports'
     | '/dashboard/settings'
     | '/dashboard/sms'
@@ -278,7 +267,6 @@ export interface FileRouteTypes {
     | '/dashboard/payment-links'
     | '/dashboard/products'
     | '/dashboard/profile'
-    | '/dashboard/qr-code'
     | '/dashboard/reports'
     | '/dashboard/settings'
     | '/dashboard/sms'
@@ -303,7 +291,6 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/payment-links'
     | '/_authenticated/dashboard/products'
     | '/_authenticated/dashboard/profile'
-    | '/_authenticated/dashboard/qr-code'
     | '/_authenticated/dashboard/reports'
     | '/_authenticated/dashboard/settings'
     | '/_authenticated/dashboard/sms'
@@ -424,13 +411,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardReportsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/dashboard/qr-code': {
-      id: '/_authenticated/dashboard/qr-code'
-      path: '/dashboard/qr-code'
-      fullPath: '/dashboard/qr-code'
-      preLoaderRoute: typeof AuthenticatedDashboardQrCodeRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/dashboard/profile': {
       id: '/_authenticated/dashboard/profile'
       path: '/dashboard/profile'
@@ -499,7 +479,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardPaymentLinksRoute: typeof AuthenticatedDashboardPaymentLinksRoute
   AuthenticatedDashboardProductsRoute: typeof AuthenticatedDashboardProductsRoute
   AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
-  AuthenticatedDashboardQrCodeRoute: typeof AuthenticatedDashboardQrCodeRoute
   AuthenticatedDashboardReportsRoute: typeof AuthenticatedDashboardReportsRoute
   AuthenticatedDashboardSettingsRoute: typeof AuthenticatedDashboardSettingsRoute
   AuthenticatedDashboardSmsRoute: typeof AuthenticatedDashboardSmsRoute
@@ -521,7 +500,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardPaymentLinksRoute,
   AuthenticatedDashboardProductsRoute: AuthenticatedDashboardProductsRoute,
   AuthenticatedDashboardProfileRoute: AuthenticatedDashboardProfileRoute,
-  AuthenticatedDashboardQrCodeRoute: AuthenticatedDashboardQrCodeRoute,
   AuthenticatedDashboardReportsRoute: AuthenticatedDashboardReportsRoute,
   AuthenticatedDashboardSettingsRoute: AuthenticatedDashboardSettingsRoute,
   AuthenticatedDashboardSmsRoute: AuthenticatedDashboardSmsRoute,

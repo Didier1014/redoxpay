@@ -2,11 +2,11 @@ import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getProductBySlug } from "@/lib/products.functions";
-import { createCheckout } from "@/lib/transactions.functions";
+import { createCheckout, checkTransactionStatus } from "@/lib/transactions.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, Loader2, Lock, Heart, ShieldCheck, AlertTriangle, Clock, X, Smartphone } from "lucide-react";
+import { CheckCircle2, Loader2, Lock, Heart, ShieldCheck, AlertTriangle, Smartphone, ExternalLink } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
@@ -53,7 +53,9 @@ function CheckoutPage() {
 
   const [form, setForm] = useState({ customer_name: "", customer_phone: "" });
   const [method, setMethod] = useState<"mpesa" | "emola">("mpesa");
-  const [modal, setModal] = useState<{ status: "processing" | "paid" | "failed" | "pending"; id?: string } | null>(null);
+  const [modal, setModal] = useState<{ status: "processing" | "paid" | "failed" | "pending"; id?: string; delivery_url?: string } | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollCountRef = useRef(0);
 
   useEffect(() => {
     if (cardRef.current) {
@@ -67,6 +69,10 @@ function CheckoutPage() {
     }
   }, [product]);
 
+  const pollStatus = useMutation({
+    mutationFn: (txId: string) => checkTransactionStatus({ data: { transaction_id: txId } }),
+  });
+
   const m = useMutation({
     mutationFn: () => checkout({
       data: {
@@ -74,10 +80,35 @@ function CheckoutPage() {
       },
     }),
     onSuccess: (r) => {
-      setModal({ status: r.status === "paid" ? "paid" : r.status === "failed" ? "failed" : "pending", id: r.id });
-      if (r.status === "paid") toast.success("Pagamento confirmado!");
-      else if (r.status === "failed") toast.error("Pagamento falhou");
-      else toast("Pagamento pendente — verifique o seu telefone");
+      // Always show pending immediately (fire-and-forget: RLX processes async)
+      setModal({ status: "pending", id: r.id, delivery_url: undefined });
+      toast("Pagamento enviado — confirme no seu telefone");
+
+      // Start polling
+      pollCountRef.current = 0;
+      if (pollRef.current) clearInterval(pollRef.current);
+      pollRef.current = setInterval(async () => {
+        pollCountRef.current++;
+        if (pollCountRef.current > 60) {
+          if (pollRef.current) clearInterval(pollRef.current);
+          toast.info("O pagamento ainda está a ser processado. Receberá uma notificação quando for confirmado.");
+          return;
+        }
+        try {
+          const result = await pollStatus.mutateAsync(r.id);
+          if (result.status === "paid") {
+            if (pollRef.current) clearInterval(pollRef.current);
+            // Fetch product to get delivery_url
+            const prodRes = await fetchProduct({ data: { slug } });
+            setModal({ status: "paid", id: r.id, delivery_url: prodRes?.delivery_url ?? undefined });
+            toast.success("Pagamento confirmado!");
+          } else if (result.status === "failed") {
+            if (pollRef.current) clearInterval(pollRef.current);
+            setModal({ status: "failed", id: r.id });
+            toast.error("Pagamento falhou");
+          }
+        } catch { /* retry */ }
+      }, 5000);
     },
     onError: (e) => {
       setModal({ status: "failed", id: undefined });
@@ -151,7 +182,16 @@ function CheckoutPage() {
                 <h2 className="text-xl font-bold text-gray-900">Pagamento confirmado!</h2>
                 <p className="text-sm text-gray-400">Recebemos o seu pagamento com sucesso.</p>
                 {modal.id && <p className="text-xs text-gray-300 pt-2">Ref: {modal.id}</p>}
-                <Button className="w-full mt-4 rounded-xl" onClick={() => setModal(null)}>Fechar</Button>
+                {modal.delivery_url ? (
+                  <a href={modal.delivery_url} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold text-white transition-all"
+                    style={{ background: "linear-gradient(135deg, #16a34a, #15803d)" }}>
+                    <ExternalLink className="h-4 w-4" />
+                    Acessar Produto
+                  </a>
+                ) : (
+                  <Button className="w-full mt-4 rounded-xl" onClick={() => setModal(null)}>Fechar</Button>
+                )}
               </div>
             ) : modal.status === "pending" ? (
               <div className="relative space-y-4">
@@ -178,7 +218,7 @@ function CheckoutPage() {
 
       <div className="sticky top-0 z-40 w-full py-2.5 px-4 flex items-center justify-center gap-2.5 text-sm font-medium"
         style={{ background: "linear-gradient(135deg, #8b0000, #a00000)", color: "#fff", boxShadow: "0 2px 16px rgba(139,0,0,0.3)" }}>
-        <Clock className="h-4 w-4 urgency-banner" />
+        <span className="urgency-banner" style={{ display: "inline-block" }}>⚡</span>
         <span>Oferta por tempo limitado — expira em <Countdown /></span>
       </div>
 

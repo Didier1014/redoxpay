@@ -43,43 +43,30 @@ export const payLink = createServerFn({ method: "POST" })
     const amount = Number(link.amount_mzn);
     const { fee, net } = calcFee(amount);
 
-    let status: "pending" | "paid" | "failed" = "pending";
-    let external_ref: string | null = null;
     const token = process.env.RLX_API_TOKEN;
-    if (token) {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
-        const res = await fetch("https://checkout.rlxl.ink/api.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ action: "pay", phone: normalizePhone(data.customer_phone), amount, nome_cliente: data.customer_name, webhook_url: "https://redoxpay.vercel.app/api/public/rlx-webhook" }),
-          signal: controller.signal,
-        });
-        clearTimeout(timeout);
-        const j = (await res.json().catch(() => ({}))) as { status?: string; txid?: string; partner_transaction_id?: string; erro?: string; error?: string };
-        external_ref = j.txid ?? j.partner_transaction_id ?? null;
-        if (j.status === "success" || j.status === "paid") status = "paid";
-        else if (j.status === "pending") status = "pending";
-        else if (j.status === "failed" || j.status === "error") status = "failed";
-        else status = "pending";
-      } catch { status = "failed"; }
-    } else {
-      status = "paid"; external_ref = `SIM-${Date.now()}`;
-    }
-
+    // Insert transaction FIRST with pending status
     const { data: tx, error } = await supabaseAdmin.from("transactions").insert({
       user_id: link.user_id, customer_name: data.customer_name, customer_email: data.customer_email || null,
-      customer_phone: data.customer_phone, method: data.method, amount_mzn: amount, fee_mzn: fee, net_mzn: net, status, external_ref,
+      customer_phone: data.customer_phone, method: data.method, amount_mzn: amount, fee_mzn: fee, net_mzn: net, status: "pending", external_ref: null,
     }).select().single();
     if (error) throw new Error(error.message);
 
-    if (status === "paid") {
+    // Fire-and-forget RLX pay — Vercel Hobby kills functions after 10s, RLX takes 30-60s.
+    if (token) {
+      const phone = normalizePhone(data.customer_phone);
+      const webhookUrl = `${process.env.SITE_URL ?? "https://redoxpay.vercel.app"}/api/public/rlx-webhook`;
+      fetch("https://checkout.rlxl.ink/api.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: "pay", phone, amount, nome_cliente: data.customer_name, webhook_url: webhookUrl }),
+      }).catch(() => {});
+    } else {
+      await supabaseAdmin.from("transactions").update({ status: "paid", external_ref: `SIM-${Date.now()}` }).eq("id", tx.id);
       await supabaseAdmin.from("payment_links").update({ payments_count: (link.payments_count ?? 0) + 1 }).eq("id", link.id);
       const { data: prof } = await supabaseAdmin.from("profiles").select("balance_mzn").eq("id", link.user_id).maybeSingle();
       await supabaseAdmin.from("profiles").update({ balance_mzn: Number(prof?.balance_mzn ?? 0) + net }).eq("id", link.user_id);
     }
-    return { id: tx.id, status };
+    return { id: tx.id, status: "pending" };
   });
 
 const schema = z.object({

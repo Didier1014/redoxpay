@@ -67,60 +67,7 @@ export const createCheckout = createServerFn({ method: "POST" })
     if (amount < 60) throw new Error("Valor mínimo é 60 MT");
     const { fee, net } = calcFee(amount);
 
-    let status: "pending" | "paid" | "failed" = "pending";
-    let external_ref: string | null = null;
-    let providerMessage: string | null = null;
-
-    const token = process.env.RLX_API_TOKEN;
-    if (token && data.method !== "card") {
-      try {
-        const phone = normalizePhone(data.customer_phone);
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
-        const res = await fetch("https://checkout.rlxl.ink/api.php", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            action: "pay",
-            phone,
-            amount,
-            nome_cliente: data.customer_name,
-            webhook_url: "https://redoxpay.vercel.app/api/public/rlx-webhook",
-          }),
-          signal: controller.signal,
-        });
-        clearTimeout(timeout);
-        const json = (await res.json().catch(() => ({}))) as {
-          status?: string;
-          txid?: string;
-          partner_transaction_id?: string;
-          message?: string;
-          erro?: string;
-          error?: string;
-        };
-        external_ref = json.txid ?? json.partner_transaction_id ?? null;
-        providerMessage = json.message ?? json.erro ?? json.error ?? null;
-        if (json.status === "success" || json.status === "paid") status = "paid";
-        else if (json.status === "pending") status = "pending";
-        else if (json.status === "failed" || json.status === "error") status = "failed";
-        else status = "pending";
-      } catch (e) {
-        status = "failed";
-        providerMessage = e instanceof Error ? e.message : "Erro no gateway";
-      }
-    } else if (!token) {
-      // Sandbox/simulation when no token configured
-      status = "paid";
-      external_ref = `SIM-${Date.now()}`;
-    } else {
-      // Card not yet supported by RLX C2B
-      status = "failed";
-      providerMessage = "Cartão indisponível neste momento";
-    }
-
+    // Insert transaction FIRST with pending status
     const { data: tx, error: tErr } = await supabaseAdmin.from("transactions").insert({
       user_id: product.user_id,
       product_id: product.id,
@@ -131,19 +78,29 @@ export const createCheckout = createServerFn({ method: "POST" })
       amount_mzn: amount,
       fee_mzn: fee,
       net_mzn: net,
-      status,
-      external_ref,
+      status: "pending",
+      external_ref: null,
     }).select().single();
     if (tErr) throw new Error(tErr.message);
 
-    if (status === "paid") {
-      const { data: prof } = await supabaseAdmin
-        .from("profiles").select("balance_mzn").eq("id", product.user_id).maybeSingle();
-      const newBal = Number(prof?.balance_mzn ?? 0) + net;
-      await supabaseAdmin.from("profiles").update({ balance_mzn: newBal }).eq("id", product.user_id);
+    // Fire-and-forget RLX pay — Vercel Hobby kills functions after 10s, RLX takes 30-60s.
+    // Initiate request without awaiting; RLX processes async and sends webhook.
+    const token = process.env.RLX_API_TOKEN;
+    if (token && data.method !== "card") {
+      const phone = normalizePhone(data.customer_phone);
+      const webhookUrl = `${process.env.SITE_URL ?? "https://redoxpay.vercel.app"}/api/public/rlx-webhook`;
+      fetch("https://checkout.rlxl.ink/api.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: "pay", phone, amount, nome_cliente: data.customer_name, webhook_url: webhookUrl }),
+      }).catch(() => {});
+    } else if (!token) {
+      await supabaseAdmin.from("transactions").update({ status: "paid", external_ref: `SIM-${Date.now()}` }).eq("id", tx.id);
+      const { data: prof } = await supabaseAdmin.from("profiles").select("balance_mzn").eq("id", product.user_id).maybeSingle();
+      await supabaseAdmin.from("profiles").update({ balance_mzn: Number(prof?.balance_mzn ?? 0) + net }).eq("id", product.user_id);
     }
 
-    return { id: tx.id, status, amount, fee, net, message: providerMessage };
+    return { id: tx.id, status: "pending", amount, fee, net, message: null };
   });
 
 // Polling endpoint — checks RLX for an updated transaction status.
