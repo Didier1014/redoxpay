@@ -19,6 +19,14 @@ dist-ssr
 # Lovable
 .lovable/
 
+# Vercel
+.vercel/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
