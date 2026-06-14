@@ -1,0 +1,56 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { listMyTransactions } from "@/lib/transactions.functions";
+import { Card } from "@/components/ui/card";
+import { useState } from "react";
+
+export const Route = createFileRoute("/_authenticated/dashboard/transactions")({
+  component: TxPage,
+});
+
+const fmtMT = (n: number) => `${new Intl.NumberFormat("pt-MZ", { maximumFractionDigits: 0 }).format(n)} MT`;
+
+function TxPage() {
+  const fetchTx = useServerFn(listMyTransactions);
+  const { data = [], isLoading } = useQuery({ queryKey: ["tx"], queryFn: () => fetchTx() });
+  const [filter, setFilter] = useState<"all"|"paid"|"pending"|"failed">("all");
+  const filtered = data.filter(t => filter === "all" || t.status === filter);
+
+  return (
+    <div className="space-y-4">
+      <div className="px-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Transações</h1>
+        <p className="text-sm text-muted-foreground">{data.length} no total</p>
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {([["all","Todas"],["paid","Sucesso"],["pending","Pendente"],["failed","Falhou"]] as const).map(([k,l]) => (
+          <button key={k} onClick={()=>setFilter(k)} className={`shrink-0 px-4 py-2 rounded-xl text-xs font-medium ${filter===k ? "bg-foreground text-background" : "bg-card border border-border"}`}>{l}</button>
+        ))}
+      </div>
+
+      <Card className="rounded-2xl shadow-sm divide-y divide-border">
+        {isLoading && <p className="p-8 text-center text-muted-foreground text-sm">Carregando...</p>}
+        {!isLoading && !filtered.length && <p className="p-8 text-center text-muted-foreground text-sm">Nenhuma transação.</p>}
+        {filtered.map(t => (
+          <div key={t.id} className="p-4 flex items-center gap-3">
+            <div className={`h-10 w-10 rounded-xl flex items-center justify-center text-xs font-bold ${t.method==='mpesa' ? 'bg-rose-50 text-[#e11d48]' : t.method==='emola' ? 'bg-amber-50 text-[#f59e0b]' : 'bg-secondary'}`}>
+              {t.method==='mpesa' ? 'MP' : t.method==='emola' ? 'EM' : 'CC'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm truncate">{t.customer_name}</p>
+              <p className="text-xs text-muted-foreground">{t.customer_phone} · {new Date(t.created_at).toLocaleDateString("pt-MZ")}</p>
+            </div>
+            <div className="text-right">
+              <p className="font-semibold">{fmtMT(Number(t.amount_mzn))}</p>
+              {t.status === 'paid' && <p className="text-xs text-emerald-600">● Sucesso</p>}
+              {t.status === 'failed' && <p className="text-xs text-[#e11d48]">● Falhou</p>}
+              {t.status === 'pending' && <p className="text-xs text-amber-600">● Pendente</p>}
+            </div>
+          </div>
+        ))}
+      </Card>
+    </div>
+  );
+}

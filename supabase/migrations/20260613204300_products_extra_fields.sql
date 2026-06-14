@@ -1,0 +1,6 @@
+
+ALTER TABLE public.products
+  ADD COLUMN IF NOT EXISTS pixel_id TEXT,
+  ADD COLUMN IF NOT EXISTS utimify_id TEXT,
+  ADD COLUMN IF NOT EXISTS lawtracker_id TEXT,
+  ADD COLUMN IF NOT EXISTS support_phone TEXT;
