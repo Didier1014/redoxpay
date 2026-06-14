@@ -88,6 +88,11 @@ function CheckoutPage() {
           <span className="ml-auto flex items-center gap-1 text-muted-foreground"><Lock className="h-3 w-3" /> Pagamento seguro</span>
         </div>
       </header>
+      {product.cover_url && (
+        <div className="w-full h-56 lg:h-72 overflow-hidden bg-secondary">
+          <img src={product.cover_url} alt={product.name} className="w-full h-full object-cover" />
+        </div>
+      )}
       <div className="max-w-5xl mx-auto px-4 py-8 grid lg:grid-cols-5 gap-8">
         <div className="lg:col-span-3 space-y-6">
           <Card>
@@ -124,7 +129,6 @@ function CheckoutPage() {
         <div className="lg:col-span-2">
           <Card className="lg:sticky lg:top-6">
             <CardContent className="p-6 space-y-4">
-              {product.cover_url && <img src={product.cover_url} alt={product.name} className="w-full h-40 object-cover rounded-md" />}
               <div>
                 <h1 className="text-xl font-bold">{product.name}</h1>
                 {product.description && <p className="text-sm text-muted-foreground mt-1">{product.description}</p>}

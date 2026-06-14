@@ -14,6 +14,10 @@ export const Route = createFileRoute("/_authenticated/dashboard/new-transaction"
   component: NewTransactionPage,
 });
 
+function fmtMT(n: number) {
+  return new Intl.NumberFormat("pt-MZ", { style: "currency", currency: "MZN", maximumFractionDigits: 0 }).format(n);
+}
+
 function NewTransactionPage() {
   const router = useRouter();
   const fetchList = useServerFn(listMyProducts);
@@ -24,18 +28,30 @@ function NewTransactionPage() {
   const [phone, setPhone] = useState("258");
   const [name, setName] = useState("");
   const [productId, setProductId] = useState<string>("");
+  const [amount, setAmount] = useState("");
+
+  const selectedProduct = products.find(p => p.id === productId) ?? products[0];
+  const displayAmount = amount ? Number(amount) : (selectedProduct ? Number(selectedProduct.price_mzn) : 0);
 
   const m = useMutation({
     mutationFn: () => {
       const pid = productId || products[0]?.id;
       if (!pid) throw new Error("Crie um produto primeiro");
-      return charge({ data: { product_id: pid, customer_name: name || "Cliente", customer_phone: phone, method } });
+      return charge({
+        data: {
+          product_id: pid,
+          customer_name: name || "Cliente",
+          customer_phone: phone,
+          method,
+          amount_mzn: amount ? Number(amount) : undefined,
+        },
+      });
     },
     onSuccess: () => { toast.success("Pedido enviado!"); router.navigate({ to: "/dashboard/transactions" }); },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
   });
 
-  const ready = !!phone && phone.length >= 9 && !!products.length;
+  const ready = !!phone && phone.length >= 9 && !!products.length && displayAmount >= 60;
 
   return (
     <div className="space-y-5">
@@ -43,6 +59,12 @@ function NewTransactionPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Nova transacção</h1>
         <p className="text-sm text-muted-foreground">Teste C2B com M-Pesa ou e-Mola. As taxas do sistema são aplicadas automaticamente.</p>
       </div>
+
+      {selectedProduct && selectedProduct.cover_url && (
+        <div className="rounded-2xl overflow-hidden h-48 bg-secondary">
+          <img src={selectedProduct.cover_url} alt={selectedProduct.name} className="w-full h-full object-cover" />
+        </div>
+      )}
 
       <div>
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">Método</p>
@@ -56,20 +78,48 @@ function NewTransactionPage() {
         </div>
       </div>
 
+      <Field label="Valor (MT)">
+        <Input
+          type="number"
+          value={amount}
+          onChange={e => setAmount(e.target.value)}
+          placeholder={selectedProduct ? String(Number(selectedProduct.price_mzn)) : "100"}
+          className="h-12 bg-secondary border-0 rounded-xl text-lg font-semibold"
+          min={60}
+        />
+        <p className="text-xs text-muted-foreground mt-1">Mínimo: 60 MT. Se vazio, usa o preço do produto.</p>
+      </Field>
+
       <Field label="Número do cliente"><Input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="258840000000" className="h-12 bg-secondary border-0 rounded-xl" /></Field>
       <Field label="Nome do cliente (opcional)"><Input value={name} onChange={e=>setName(e.target.value)} placeholder="Maria Silva" className="h-12 bg-secondary border-0 rounded-xl" /></Field>
 
-      {products.length > 1 && (
-        <Field label="Produto associado">
-          <select value={productId} onChange={e=>setProductId(e.target.value)} className="h-12 w-full bg-secondary rounded-xl px-3 text-sm">
-            <option value="">{products[0].name}</option>
-            {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
-        </Field>
+      <Field label="Produto associado">
+        <select value={productId} onChange={e=>setProductId(e.target.value)} className="h-12 w-full bg-secondary rounded-xl px-3 text-sm">
+          {products.map(p => <option key={p.id} value={p.id}>{p.name} — {fmtMT(Number(p.price_mzn))}</option>)}
+        </select>
+      </Field>
+
+      {displayAmount >= 60 && (
+        <Card className="p-4 rounded-xl bg-card/40 border border-white/5">
+          <div className="flex justify-between text-sm">
+            <span>Valor</span>
+            <span className="font-semibold">{fmtMT(displayAmount)}</span>
+          </div>
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>Taxa (15% + 15 MT)</span>
+            <span>{fmtMT(Math.round((displayAmount * 0.15 + 15) * 100) / 100)}</span>
+          </div>
+          <div className="flex justify-between text-sm border-t border-border mt-2 pt-2">
+            <span>Líquido para o vendedor</span>
+            <span className="font-semibold text-emerald-400">
+              {fmtMT(Math.round((displayAmount - (displayAmount * 0.15 + 15)) * 100) / 100)}
+            </span>
+          </div>
+        </Card>
       )}
 
       <Button onClick={()=>m.mutate()} disabled={!ready || m.isPending} className="w-full h-14 rounded-xl bg-foreground text-background disabled:bg-muted disabled:text-muted-foreground">
-        Enviar pedido de pagamento
+        {m.isPending ? "A enviar..." : `Pagar ${fmtMT(displayAmount)}`}
       </Button>
     </div>
   );
