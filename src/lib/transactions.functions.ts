@@ -82,11 +82,10 @@ export const createCheckout = createServerFn({ method: "POST" })
           },
           body: JSON.stringify({
             action: "pay",
-            canal: data.method, // "mpesa" | "emola"
-            valor: amount,
-            telefone: phone,
-            nome: data.customer_name,
-            referencia: `${product.id}-${Date.now()}`,
+            phone,
+            amount,
+            nome_cliente: data.customer_name,
+            webhook_url: "https://redoxpay.vercel.app/api/public/rlx-webhook",
           }),
         });
         const json = (await res.json().catch(() => ({}))) as {

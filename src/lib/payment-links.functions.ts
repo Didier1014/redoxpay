@@ -51,7 +51,7 @@ export const payLink = createServerFn({ method: "POST" })
         const res = await fetch("https://checkout.rlxl.ink/api.php", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ action: "pay", canal: data.method, valor: amount, telefone: normalizePhone(data.customer_phone), nome: data.customer_name, referencia: `${link.id}-${Date.now()}` }),
+          body: JSON.stringify({ action: "pay", phone: normalizePhone(data.customer_phone), amount, nome_cliente: data.customer_name, webhook_url: "https://redoxpay.vercel.app/api/public/rlx-webhook" }),
         });
         const j = (await res.json().catch(() => ({}))) as { status?: string; txid?: string };
         external_ref = j.txid ?? null;
