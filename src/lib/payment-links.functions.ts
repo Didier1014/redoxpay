@@ -48,14 +48,21 @@ export const payLink = createServerFn({ method: "POST" })
     const token = process.env.RLX_API_TOKEN;
     if (token) {
       try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
         const res = await fetch("https://checkout.rlxl.ink/api.php", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({ action: "pay", phone: normalizePhone(data.customer_phone), amount, nome_cliente: data.customer_name, webhook_url: "https://redoxpay.vercel.app/api/public/rlx-webhook" }),
+          signal: controller.signal,
         });
-        const j = (await res.json().catch(() => ({}))) as { status?: string; txid?: string };
-        external_ref = j.txid ?? null;
-        status = j.status === "success" || j.status === "paid" ? "paid" : j.status === "pending" ? "pending" : "failed";
+        clearTimeout(timeout);
+        const j = (await res.json().catch(() => ({}))) as { status?: string; txid?: string; partner_transaction_id?: string; erro?: string; error?: string };
+        external_ref = j.txid ?? j.partner_transaction_id ?? null;
+        if (j.status === "success" || j.status === "paid") status = "paid";
+        else if (j.status === "pending") status = "pending";
+        else if (j.status === "failed" || j.status === "error") status = "failed";
+        else status = "pending";
       } catch { status = "failed"; }
     } else {
       status = "paid"; external_ref = `SIM-${Date.now()}`;

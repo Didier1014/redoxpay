@@ -75,6 +75,8 @@ export const createCheckout = createServerFn({ method: "POST" })
     if (token && data.method !== "card") {
       try {
         const phone = normalizePhone(data.customer_phone);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
         const res = await fetch("https://checkout.rlxl.ink/api.php", {
           method: "POST",
           headers: {
@@ -88,18 +90,23 @@ export const createCheckout = createServerFn({ method: "POST" })
             nome_cliente: data.customer_name,
             webhook_url: "https://redoxpay.vercel.app/api/public/rlx-webhook",
           }),
+          signal: controller.signal,
         });
+        clearTimeout(timeout);
         const json = (await res.json().catch(() => ({}))) as {
           status?: string;
           txid?: string;
+          partner_transaction_id?: string;
           message?: string;
           erro?: string;
+          error?: string;
         };
-        external_ref = json.txid ?? null;
-        providerMessage = json.message ?? json.erro ?? null;
+        external_ref = json.txid ?? json.partner_transaction_id ?? null;
+        providerMessage = json.message ?? json.erro ?? json.error ?? null;
         if (json.status === "success" || json.status === "paid") status = "paid";
         else if (json.status === "pending") status = "pending";
-        else status = "failed";
+        else if (json.status === "failed" || json.status === "error") status = "failed";
+        else status = "pending";
       } catch (e) {
         status = "failed";
         providerMessage = e instanceof Error ? e.message : "Erro no gateway";
