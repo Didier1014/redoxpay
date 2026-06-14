@@ -129,7 +129,7 @@ function AdminPage() {
           <Card className="p-5 bg-card/40 border border-white/5 rounded-2xl">
             <h2 className="font-semibold mb-3">Sistema</h2>
             <div className="space-y-2 text-sm">
-              <Row label="Gateway RLX" value="Online" color="text-emerald-400" />
+              <Row label="Gateway" value="Online" color="text-emerald-400" />
               <Row label="Base de dados" value="Operacional" color="text-emerald-400" />
               <Row label="Webhook" value="https://redoxpay.vercel.app/api/public/rlx-webhook" color="text-muted-foreground" mono />
             </div>

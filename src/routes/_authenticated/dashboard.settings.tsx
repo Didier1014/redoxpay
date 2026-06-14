@@ -41,7 +41,7 @@ function SettingsPage() {
             </div>
             <div>
               <h3 className="font-semibold flex items-center gap-2">
-                Gateway RLX
+                Gateway
                 <span className={`h-2 w-2 rounded-full ${dot}`} />
               </h3>
               <p className="text-xs text-muted-foreground">{data?.message ?? "A verificar…"}</p>
@@ -61,7 +61,7 @@ function SettingsPage() {
 
       <Card className="relative overflow-hidden rounded-2xl p-5 bg-card/40 border border-white/5">
         <h3 className="font-semibold">Webhook</h3>
-        <p className="text-sm text-muted-foreground mt-1">URL configurada no painel RLX:</p>
+        <p className="text-sm text-muted-foreground mt-1">URL para receber notificações de pagamento:</p>
         <code className="block mt-2 p-3 rounded-lg bg-white/5 border border-white/5 text-xs break-all text-primary-glow">
           {webhookUrl}
         </code>

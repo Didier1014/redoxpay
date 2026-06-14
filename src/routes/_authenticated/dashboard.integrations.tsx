@@ -203,7 +203,7 @@ function IntegrationDetail({
       {integration.id === "webhooks" && (
         <Card className="rounded-2xl shadow-sm p-5 bg-primary/5 border-primary/20">
           <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Webhook Redox Pay (receber eventos)</h3>
-          <p className="text-xs text-muted-foreground mb-2">Configure este URL no RLX para receber atualizações de pagamento:</p>
+          <p className="text-xs text-muted-foreground mb-2">URL para receber atualizações de pagamento em tempo real:</p>
           <code className="block p-3 rounded-lg bg-black/40 border border-white/10 text-xs break-all font-mono">{REDOX_WEBHOOK_URL}</code>
           <Button
             variant="outline" size="sm"
