@@ -59,7 +59,7 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email, password,
         options: {
           emailRedirectTo: window.location.origin,
@@ -73,8 +73,12 @@ function AuthPage() {
         },
       });
       if (error) throw error;
-      toast.success("Conta criada com sucesso!");
-      navigate({ to: "/dashboard" });
+      if (data.session) {
+        navigate({ to: "/dashboard" });
+      } else {
+        toast.success("Conta criada! Confirme o seu email antes de entrar.");
+        setMode("login");
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao criar conta");
     } finally {
