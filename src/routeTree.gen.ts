@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ObrigadoRouteImport } from './routes/obrigado'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -39,6 +40,11 @@ import { Route as AuthenticatedDashboardNotificationsConfigRouteImport } from '.
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ObrigadoRoute = ObrigadoRouteImport.update({
+  id: '/obrigado',
+  path: '/obrigado',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -187,6 +193,7 @@ const AuthenticatedDashboardNotificationsConfigRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/obrigado': typeof ObrigadoRoute
   '/reset-password': typeof ResetPasswordRoute
   '/c/$slug': typeof CSlugRoute
   '/l/$slug': typeof LSlugRoute
@@ -214,6 +221,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/obrigado': typeof ObrigadoRoute
   '/reset-password': typeof ResetPasswordRoute
   '/c/$slug': typeof CSlugRoute
   '/l/$slug': typeof LSlugRoute
@@ -243,6 +251,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/obrigado': typeof ObrigadoRoute
   '/reset-password': typeof ResetPasswordRoute
   '/c/$slug': typeof CSlugRoute
   '/l/$slug': typeof LSlugRoute
@@ -272,6 +281,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/obrigado'
     | '/reset-password'
     | '/c/$slug'
     | '/l/$slug'
@@ -299,6 +309,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/obrigado'
     | '/reset-password'
     | '/c/$slug'
     | '/l/$slug'
@@ -327,6 +338,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/obrigado'
     | '/reset-password'
     | '/c/$slug'
     | '/l/$slug'
@@ -356,6 +368,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ObrigadoRoute: typeof ObrigadoRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   CSlugRoute: typeof CSlugRoute
   LSlugRoute: typeof LSlugRoute
@@ -371,6 +384,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/obrigado': {
+      id: '/obrigado'
+      path: '/obrigado'
+      fullPath: '/obrigado'
+      preLoaderRoute: typeof ObrigadoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -618,6 +638,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ObrigadoRoute: ObrigadoRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   CSlugRoute: CSlugRoute,
   LSlugRoute: LSlugRoute,

@@ -111,7 +111,14 @@ export const checkTransactionStatus = createServerFn({ method: "POST" })
     const { data: tx } = await supabaseAdmin
       .from("transactions").select("*").eq("id", data.transaction_id).maybeSingle();
     if (!tx) throw new Error("Transacção não encontrada");
-    if (tx.status === "paid" || tx.status === "failed") return { status: tx.status };
+    if (tx.status === "paid" || tx.status === "failed") {
+      if (tx.status === "paid") {
+        const { data: prod } = await supabaseAdmin
+          .from("products").select("delivery_url").eq("id", tx.product_id).maybeSingle();
+        return { status: tx.status, delivery_url: prod?.delivery_url ?? undefined };
+      }
+      return { status: tx.status };
+    }
 
     const token = process.env.RLX_API_TOKEN;
     if (!token || !tx.external_ref) return { status: tx.status };
@@ -136,6 +143,11 @@ export const checkTransactionStatus = createServerFn({ method: "POST" })
             .update({ balance_mzn: Number(prof?.balance_mzn ?? 0) + Number(tx.net_mzn) })
             .eq("id", tx.user_id);
         }
+      }
+      if (next === "paid" || tx.status === "paid") {
+        const { data: prod } = await supabaseAdmin
+          .from("products").select("delivery_url").eq("id", tx.product_id).maybeSingle();
+        return { status: next === "paid" ? next : tx.status, delivery_url: prod?.delivery_url ?? undefined };
       }
       return { status: next };
     } catch {

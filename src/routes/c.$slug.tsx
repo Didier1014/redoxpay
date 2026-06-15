@@ -6,7 +6,7 @@ import { createCheckout, checkTransactionStatus } from "@/lib/transactions.funct
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, Loader2, Lock, Heart, ShieldCheck, AlertTriangle, Smartphone, ExternalLink } from "lucide-react";
+import { Loader2, Lock, Heart, ShieldCheck, AlertTriangle, Smartphone } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
@@ -101,15 +101,7 @@ function CheckoutPage() {
           if (result.status === "paid") {
             if (pollRef.current) clearInterval(pollRef.current);
             toast.success("Pagamento confirmado!");
-            // Fetch product to get delivery_url
-            const prodRes = await fetchProduct({ data: { slug } });
-            const url = prodRes?.delivery_url;
-            if (url) {
-              // Auto-redirect to the deliverable
-              window.location.href = url;
-            } else {
-              setModal({ status: "paid", id: r.id, delivery_url: undefined });
-            }
+            window.location.href = `/obrigado?tx_id=${r.id}&slug=${slug}`;
           } else if (result.status === "failed") {
             if (pollRef.current) clearInterval(pollRef.current);
             setModal({ status: "failed", id: r.id });
@@ -184,17 +176,6 @@ function CheckoutPage() {
                 </div>
                 <h2 className="text-xl font-bold text-gray-900">A processar pagamento</h2>
                 <p className="text-sm text-gray-400">Aguardando confirmação do pagamento...</p>
-              </div>
-            ) : modal.status === "paid" ? (
-              <div className="relative space-y-4">
-                <CheckCircle2 className="h-14 w-14 mx-auto" style={{ color: "#ff3333" }} />
-                <h2 className="text-xl font-bold text-gray-900">Pagamento confirmado!</h2>
-                <p className="text-sm text-gray-400">Recebemos o seu pagamento com sucesso.</p>
-                {modal.id && <p className="text-xs text-gray-300 pt-2">Ref: {modal.id}</p>}
-                <div className="space-y-3">
-                  <p className="text-xs text-gray-400">Produto disponível em breve, verifique seu email</p>
-                  <Button className="w-full rounded-xl" onClick={() => setModal(null)}>Fechar</Button>
-                </div>
               </div>
             ) : modal.status === "pending" ? (
               <div className="relative space-y-4">

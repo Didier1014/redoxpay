@@ -37,7 +37,7 @@ export const listMyProducts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
-      .from("products").select("*").order("created_at", { ascending: false });
+      .from("products").select("*").eq("user_id", context.userId).order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     const rows = data ?? [];
     return Promise.all(rows.map(async (p) => ({ ...p, cover_url: await signCover(context.supabase, p.cover_url) })));
@@ -102,7 +102,7 @@ export const toggleProduct = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), active: z.boolean() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
-      .from("products").update({ active: data.active }).eq("id", data.id);
+      .from("products").update({ active: data.active }).eq("id", data.id).eq("user_id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -111,7 +111,7 @@ export const deleteProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("products").delete().eq("id", data.id);
+    const { error } = await context.supabase.from("products").delete().eq("id", data.id).eq("user_id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -123,7 +123,7 @@ export const getProductBySlug = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("products")
-      .select("id,user_id,slug,name,description,price_mzn,cover_url,active,pixel_id,utimify_id,lawtracker_id,support_phone")
+      .select("id,user_id,slug,name,description,price_mzn,cover_url,delivery_url,active,pixel_id,utimify_id,lawtracker_id,support_phone")
       .eq("slug", data.slug).eq("active", true).maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) throw new Error("Produto não encontrado");
