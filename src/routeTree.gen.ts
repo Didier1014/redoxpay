@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LSlugRouteImport } from './routes/l.$slug'
 import { Route as CSlugRouteImport } from './routes/c.$slug'
+import { Route as ApiMigratePushRouteImport } from './routes/api/migrate-push'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as ApiPublicRlxWebhookRouteImport } from './routes/api/public/rlx-webhook'
 import { Route as AuthenticatedDashboardWithdrawalsRouteImport } from './routes/_authenticated/dashboard.withdrawals'
@@ -69,6 +70,11 @@ const LSlugRoute = LSlugRouteImport.update({
 const CSlugRoute = CSlugRouteImport.update({
   id: '/c/$slug',
   path: '/c/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMigratePushRoute = ApiMigratePushRouteImport.update({
+  id: '/api/migrate-push',
+  path: '/api/migrate-push',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardIndexRoute =
@@ -195,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/obrigado': typeof ObrigadoRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/api/migrate-push': typeof ApiMigratePushRoute
   '/c/$slug': typeof CSlugRoute
   '/l/$slug': typeof LSlugRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/obrigado': typeof ObrigadoRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/api/migrate-push': typeof ApiMigratePushRoute
   '/c/$slug': typeof CSlugRoute
   '/l/$slug': typeof LSlugRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -253,6 +261,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/obrigado': typeof ObrigadoRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/api/migrate-push': typeof ApiMigratePushRoute
   '/c/$slug': typeof CSlugRoute
   '/l/$slug': typeof LSlugRoute
   '/_authenticated/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -283,6 +292,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/obrigado'
     | '/reset-password'
+    | '/api/migrate-push'
     | '/c/$slug'
     | '/l/$slug'
     | '/dashboard/admin'
@@ -311,6 +321,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/obrigado'
     | '/reset-password'
+    | '/api/migrate-push'
     | '/c/$slug'
     | '/l/$slug'
     | '/dashboard/admin'
@@ -340,6 +351,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/obrigado'
     | '/reset-password'
+    | '/api/migrate-push'
     | '/c/$slug'
     | '/l/$slug'
     | '/_authenticated/dashboard/admin'
@@ -370,6 +382,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ObrigadoRoute: typeof ObrigadoRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiMigratePushRoute: typeof ApiMigratePushRoute
   CSlugRoute: typeof CSlugRoute
   LSlugRoute: typeof LSlugRoute
   ApiPublicRlxWebhookRoute: typeof ApiPublicRlxWebhookRoute
@@ -426,6 +439,13 @@ declare module '@tanstack/react-router' {
       path: '/c/$slug'
       fullPath: '/c/$slug'
       preLoaderRoute: typeof CSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/migrate-push': {
+      id: '/api/migrate-push'
+      path: '/api/migrate-push'
+      fullPath: '/api/migrate-push'
+      preLoaderRoute: typeof ApiMigratePushRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard/': {
@@ -640,6 +660,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ObrigadoRoute: ObrigadoRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiMigratePushRoute: ApiMigratePushRoute,
   CSlugRoute: CSlugRoute,
   LSlugRoute: LSlugRoute,
   ApiPublicRlxWebhookRoute: ApiPublicRlxWebhookRoute,
