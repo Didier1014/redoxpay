@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/integrations")({
   component: IntegrationsPage,
 });
 
-type IntegrationId = "utimify" | "lawtracker" | "meta_pixel" | "moz_sms" | "webhooks";
+type IntegrationId = "utimify" | "lowtrack" | "meta_pixel" | "moz_sms" | "webhooks";
 
 interface Integration {
   id: IntegrationId;
@@ -35,23 +35,21 @@ interface Integration {
 const INTEGRATIONS: Integration[] = [
   {
     id: "utimify", group: "MARKETING",
-    name: "Utimify", desc: "Rastreie conversões e atribuição UTM das suas vendas.",
+    name: "Utmify", desc: "Rastreie conversões e atribuição UTM das suas vendas.",
     icon: TrendingUp, color: "bg-violet-50 text-violet-600",
     fields: [
-      { key: "api_key", label: "API Key", type: "password", placeholder: "utmify_..." },
-      { key: "webhook_url", label: "Webhook URL", type: "url", placeholder: "https://webhook.utmify.com.br/..." },
+      { key: "api_token", label: "API Token", type: "password", placeholder: "Cole o token gerado em Integrações > Webhooks > Credenciais" },
     ],
-    docUrl: "https://utimify.com/docs",
+    docUrl: "https://app.utmify.com.br/dashboards",
   },
   {
-    id: "lawtracker", group: "MARKETING",
-    name: "LawTracker", desc: "Monitore multas, processos e diligências dos seus clientes.",
-    icon: Gavel, color: "bg-blue-50 text-blue-600",
+    id: "lowtrack", group: "MARKETING",
+    name: "LowTrack", desc: "Rastreador inteligente para baixar CPA. Envia dados de vendas para a Meta.",
+    icon: TrendingUp, color: "bg-blue-50 text-blue-600",
     fields: [
-      { key: "api_key", label: "API Key", type: "password", placeholder: "lt_..." },
-      { key: "api_url", label: "API URL", type: "url", placeholder: "https://api.lawtracker.com/..." },
+      { key: "webhook_url", label: "Webhook URL (opcional)", type: "url", placeholder: "https://api.lowtrack.com.br/webhook" },
     ],
-    docUrl: "https://lawtracker.com/docs",
+    docUrl: "https://lowtrack.com.br",
   },
   {
     id: "meta_pixel", group: "MARKETING",

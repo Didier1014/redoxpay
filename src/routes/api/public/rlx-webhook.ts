@@ -104,12 +104,13 @@ export const Route = createFileRoute("/api/public/rlx-webhook")({
             } catch {}
 
             if (notificationsEnabled) {
-              // Fetch product name for the notification
               let productName: string | null = null;
+              let productUtmifyId: string | null = null;
               if (tx.product_id) {
                 const { data: prod } = await supabaseAdmin
-                  .from("products").select("name").eq("id", tx.product_id).maybeSingle();
+                  .from("products").select("name,utimify_id").eq("id", tx.product_id).maybeSingle();
                 productName = prod?.name ?? null;
+                productUtmifyId = prod?.utimify_id ?? null;
               }
 
               await supabaseAdmin.from("notifications").insert({
@@ -126,6 +127,62 @@ export const Route = createFileRoute("/api/public/rlx-webhook")({
                 },
               }).catch(() => {});
             }
+
+            // 🔗 Send sale data to Utmify
+            try {
+              const { data: utmifyCfg } = await supabaseAdmin
+                .from("integration_settings")
+                .select("settings")
+                .eq("user_id", tx.user_id)
+                .eq("integration_key", "utimify")
+                .maybeSingle();
+              const utmifyToken = utmifyCfg?.settings?.api_token as string | undefined;
+              if (utmifyToken) {
+                const body = {
+                  status: "paid",
+                  orderId: tx.id,
+                  customer: {
+                    name: tx.customer_name ?? "",
+                    phone: tx.customer_phone ?? "",
+                  },
+                  products: productName
+                    ? [{ id: productUtmifyId ?? "", name: productName, quantity: 1, priceInCents: Math.round(Number(tx.amount_mzn) * 100) }]
+                    : [],
+                  createdAt: tx.created_at,
+                };
+                fetch("https://api.utmify.com.br/api-credentials/orders", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", "x-api-token": utmifyToken },
+                  body: JSON.stringify(body),
+                }).catch(() => {});
+              }
+            } catch {}
+
+            // 🔗 Send sale data to LowTrack (webhook)
+            try {
+              const { data: lowtrackCfg } = await supabaseAdmin
+                .from("integration_settings")
+                .select("settings")
+                .eq("user_id", tx.user_id)
+                .eq("integration_key", "lowtrack")
+                .maybeSingle();
+              const lowtrackUrl = lowtrackCfg?.settings?.webhook_url as string | undefined;
+              if (lowtrackUrl) {
+                fetch(lowtrackUrl, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    event: "payment.confirmed",
+                    orderId: tx.id,
+                    amount: Number(tx.amount_mzn),
+                    netAmount: Number(tx.net_mzn),
+                    customer: { name: tx.customer_name, phone: tx.customer_phone },
+                    product: productName,
+                    createdAt: tx.created_at,
+                  }),
+                }).catch(() => {});
+              }
+            } catch {}
           }
         }
         return new Response("ok");

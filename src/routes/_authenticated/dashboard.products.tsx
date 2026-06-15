@@ -208,12 +208,12 @@ function ProductsPage() {
                   <Input value={form.pixel_id} onChange={(e) => setForm({ ...form, pixel_id: e.target.value })} placeholder="1234567890" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="flex items-center gap-1"><Tag className="h-3 w-3 text-violet-600" /> Utimify ID</Label>
-                  <Input value={form.utimify_id} onChange={(e) => setForm({ ...form, utimify_id: e.target.value })} placeholder="utm_..." />
+                  <Label className="flex items-center gap-1"><Tag className="h-3 w-3 text-violet-600" /> Utmify ID do produto</Label>
+                  <Input value={form.utimify_id} onChange={(e) => setForm({ ...form, utimify_id: e.target.value })} placeholder="ID do produto na Utmify" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="flex items-center gap-1"><Tag className="h-3 w-3 text-blue-600" /> LawTracker ID</Label>
-                  <Input value={form.lawtracker_id} onChange={(e) => setForm({ ...form, lawtracker_id: e.target.value })} placeholder="lt_..." />
+                  <Label className="flex items-center gap-1"><Tag className="h-3 w-3 text-blue-600" /> LowTrack ID</Label>
+                  <Input value={form.lawtracker_id} onChange={(e) => setForm({ ...form, lawtracker_id: e.target.value })} placeholder="ID da oferta na LowTrack" />
                 </div>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1"><Phone className="h-3 w-3 text-emerald-600" /> Tel. Suporte</Label>
