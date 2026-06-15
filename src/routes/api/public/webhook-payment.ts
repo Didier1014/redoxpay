@@ -103,47 +103,47 @@ export const Route = createFileRoute("/api/public/webhook-payment")({
               .eq("id", tx.user_id);
 
             let currency = "MZN";
-            let notificationsEnabled = true;
             try {
               const { data: user } = await supabaseAdmin.auth.admin.getUserById(tx.user_id);
               const meta = user?.user?.user_metadata ?? {};
               if (meta.currency) currency = String(meta.currency);
-              if (meta.notifications_enabled === false) notificationsEnabled = false;
             } catch {}
 
-            if (notificationsEnabled) {
-              let productName: string | null = null;
-              let productUtmifyId: string | null = null;
-              if (tx.product_id) {
-                const { data: prod } = await supabaseAdmin
-                  .from("products").select("name,utimify_id").eq("id", tx.product_id).maybeSingle();
-                productName = prod?.name ?? null;
-                productUtmifyId = prod?.utimify_id ?? null;
-              }
-
-              await supabaseAdmin.from("notifications").insert({
-                user_id: tx.user_id,
-                type: "sale",
-                title: "Nova venda",
-                message: `Pagamento de ${Number(tx.amount_mzn).toLocaleString("pt-MZ", { style: "currency", currency })} recebido`,
-                data: {
-                  transaction_id: tx.id,
-                  amount_mzn: Number(tx.amount_mzn),
-                  currency,
-                  customer_name: tx.customer_name ?? null,
-                  product_name: productName,
-                },
-              }).catch(() => {});
-
-              const { sendPushToUser } = await import("@/lib/push.functions");
-              const formattedAmount = Number(tx.amount_mzn).toLocaleString("pt-MZ", { style: "currency", currency });
-              sendPushToUser(
-                supabaseAdmin, tx.user_id,
-                "Nova venda!",
-                `${formattedAmount} — ${tx.customer_name || "Cliente"}${productName ? ` — ${productName}` : ""}`,
-                "/dashboard/transactions",
-              ).catch(() => {});
+            let productName: string | null = null;
+            let productUtmifyId: string | null = null;
+            if (tx.product_id) {
+              const { data: prod } = await supabaseAdmin
+                .from("products").select("name,utimify_id").eq("id", tx.product_id).maybeSingle();
+              productName = prod?.name ?? null;
+              productUtmifyId = prod?.utimify_id ?? null;
             }
+
+            await supabaseAdmin.from("notifications").insert({
+              user_id: tx.user_id,
+              type: "sale",
+              title: "Nova venda",
+              message: `Pagamento de ${Number(tx.amount_mzn).toLocaleString("pt-MZ", { style: "currency", currency })} recebido`,
+              data: {
+                transaction_id: tx.id,
+                amount_mzn: Number(tx.amount_mzn),
+                currency,
+                customer_name: tx.customer_name ?? null,
+                product_name: productName,
+              },
+            }).catch((err: any) => {
+              console.error("[webhook] notification insert failed:", err);
+            });
+
+            const { sendPushToUser } = await import("@/lib/push.functions");
+            const formattedAmount = Number(tx.amount_mzn).toLocaleString("pt-MZ", { style: "currency", currency });
+            sendPushToUser(
+              supabaseAdmin, tx.user_id,
+              "Nova venda!",
+              `${formattedAmount} — ${tx.customer_name || "Cliente"}${productName ? ` — ${productName}` : ""}`,
+              "/dashboard/transactions",
+            ).catch((err: any) => {
+              console.error("[webhook] push send failed:", err);
+            });
 
             try {
               const { data: utmifyCfg } = await supabaseAdmin

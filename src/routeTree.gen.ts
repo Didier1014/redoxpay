@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LSlugRouteImport } from './routes/l.$slug'
 import { Route as CSlugRouteImport } from './routes/c.$slug'
+import { Route as ApiDebugNotificationRouteImport } from './routes/api/debug-notification'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as ApiPublicWebhookPaymentRouteImport } from './routes/api/public/webhook-payment'
 import { Route as ApiPublicRlxWebhookRouteImport } from './routes/api/public/rlx-webhook'
@@ -70,6 +71,11 @@ const LSlugRoute = LSlugRouteImport.update({
 const CSlugRoute = CSlugRouteImport.update({
   id: '/c/$slug',
   path: '/c/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDebugNotificationRoute = ApiDebugNotificationRouteImport.update({
+  id: '/api/debug-notification',
+  path: '/api/debug-notification',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardIndexRoute =
@@ -201,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/obrigado': typeof ObrigadoRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/api/debug-notification': typeof ApiDebugNotificationRoute
   '/c/$slug': typeof CSlugRoute
   '/l/$slug': typeof LSlugRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -230,6 +237,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/obrigado': typeof ObrigadoRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/api/debug-notification': typeof ApiDebugNotificationRoute
   '/c/$slug': typeof CSlugRoute
   '/l/$slug': typeof LSlugRoute
   '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -261,6 +269,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/obrigado': typeof ObrigadoRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/api/debug-notification': typeof ApiDebugNotificationRoute
   '/c/$slug': typeof CSlugRoute
   '/l/$slug': typeof LSlugRoute
   '/_authenticated/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/obrigado'
     | '/reset-password'
+    | '/api/debug-notification'
     | '/c/$slug'
     | '/l/$slug'
     | '/dashboard/admin'
@@ -321,6 +331,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/obrigado'
     | '/reset-password'
+    | '/api/debug-notification'
     | '/c/$slug'
     | '/l/$slug'
     | '/dashboard/admin'
@@ -351,6 +362,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/obrigado'
     | '/reset-password'
+    | '/api/debug-notification'
     | '/c/$slug'
     | '/l/$slug'
     | '/_authenticated/dashboard/admin'
@@ -382,6 +394,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ObrigadoRoute: typeof ObrigadoRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiDebugNotificationRoute: typeof ApiDebugNotificationRoute
   CSlugRoute: typeof CSlugRoute
   LSlugRoute: typeof LSlugRoute
   ApiPublicRlxWebhookRoute: typeof ApiPublicRlxWebhookRoute
@@ -439,6 +452,13 @@ declare module '@tanstack/react-router' {
       path: '/c/$slug'
       fullPath: '/c/$slug'
       preLoaderRoute: typeof CSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/debug-notification': {
+      id: '/api/debug-notification'
+      path: '/api/debug-notification'
+      fullPath: '/api/debug-notification'
+      preLoaderRoute: typeof ApiDebugNotificationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard/': {
@@ -660,6 +680,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ObrigadoRoute: ObrigadoRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiDebugNotificationRoute: ApiDebugNotificationRoute,
   CSlugRoute: CSlugRoute,
   LSlugRoute: LSlugRoute,
   ApiPublicRlxWebhookRoute: ApiPublicRlxWebhookRoute,
