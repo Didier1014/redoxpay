@@ -147,12 +147,17 @@ function LinkCheckout() {
 }
 
 function MethodBtn({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+  const isMpesa = label === "M-Pesa";
   return (
     <button onClick={onClick} type="button"
       className={`flex items-center justify-center gap-2 rounded-xl border p-4 text-sm font-medium transition-colors ${
         active ? "border-primary bg-primary/10 text-primary" : "border-white/10 bg-white/5 hover:bg-white/10"
       }`}>
-      <Smartphone className="h-4 w-4" /> {label}
+      <svg className="w-5 h-5 shrink-0" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="8" fill={isMpesa ? "#e11d48" : "#f59e0b"} />
+        <text x="16" y="22" textAnchor="middle" fill="white" fontSize="18" fontWeight="bold" fontFamily="Arial">{isMpesa ? "M" : "e"}</text>
+      </svg>
+      {label}
     </button>
   );
 }

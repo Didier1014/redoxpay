@@ -278,7 +278,7 @@ function CheckoutPage() {
               <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">Deseja pagar com:</p>
               <div className="grid grid-cols-2 gap-2">
                 <button onClick={() => setMethod("mpesa")} type="button"
-                  className="relative py-3 px-3 rounded-xl border-[1.5px] font-semibold text-sm transition-all"
+                  className="relative py-3 px-2 rounded-xl border-[1.5px] font-semibold text-sm transition-all flex items-center justify-center gap-1.5"
                   style={mpesaSelected
                     ? { borderColor: "#ef4444", background: "#fef2f2", color: "#dc2626", boxShadow: "0 0 0 3px rgba(220,38,38,0.08)" }
                     : { borderColor: "rgba(148,163,184,0.3)", background: "#fff", color: "#9ca3af" }}>
@@ -287,10 +287,14 @@ function CheckoutPage() {
                       <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                     </span>
                   )}
+                  <svg className="w-5 h-5 shrink-0" viewBox="0 0 32 32" fill="none">
+                    <rect width="32" height="32" rx="8" fill="#e11d48" />
+                    <text x="16" y="22" textAnchor="middle" fill="white" fontSize="18" fontWeight="bold" fontFamily="Arial">M</text>
+                  </svg>
                   M-Pesa
                 </button>
                 <button onClick={() => setMethod("emola")} type="button"
-                  className="relative py-3 px-3 rounded-xl border-[1.5px] font-semibold text-sm transition-all"
+                  className="relative py-3 px-2 rounded-xl border-[1.5px] font-semibold text-sm transition-all flex items-center justify-center gap-1.5"
                   style={emolaSelected
                     ? { borderColor: "#FF6600", background: "#fff7ed", color: "#e65500", boxShadow: "0 0 0 3px rgba(255,102,0,0.08)" }
                     : { borderColor: "rgba(148,163,184,0.3)", background: "#fff", color: "#9ca3af" }}>
@@ -299,6 +303,10 @@ function CheckoutPage() {
                       <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                     </span>
                   )}
+                  <svg className="w-5 h-5 shrink-0" viewBox="0 0 32 32" fill="none">
+                    <rect width="32" height="32" rx="8" fill="#f59e0b" />
+                    <text x="16" y="22" textAnchor="middle" fill="white" fontSize="18" fontWeight="bold" fontFamily="Arial">e</text>
+                  </svg>
                   e-Mola
                 </button>
               </div>
