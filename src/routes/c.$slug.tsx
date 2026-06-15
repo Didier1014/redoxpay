@@ -79,8 +79,10 @@ function CheckoutPage() {
         product_id: product!.id, method, ...form, customer_email: "",
       },
     }),
+    onMutate: () => {
+      setModal({ status: "processing", id: undefined });
+    },
     onSuccess: (r) => {
-      // Always show pending immediately (fire-and-forget: RLX processes async)
       setModal({ status: "pending", id: r.id, delivery_url: undefined });
       toast("Pagamento enviado — confirme no seu telefone");
 
