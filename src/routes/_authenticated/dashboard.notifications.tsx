@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { listNotifications, markNotificationRead, markAllNotificationsRead } from "@/lib/notifications.functions";
@@ -30,6 +30,7 @@ function timeAgo(date: string) {
 }
 
 function NotificationsPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const fetchList = useServerFn(listNotifications);
   const markRead = useServerFn(markNotificationRead);
@@ -63,11 +64,9 @@ function NotificationsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/dashboard/notifications/config" className="gap-1.5">
-              <Settings2 className="h-4 w-4" />
-              Configurar
-            </Link>
+          <Button variant="outline" size="sm" onClick={() => navigate({ to: "/dashboard/notifications/config" })} className="gap-1.5">
+            <Settings2 className="h-4 w-4" />
+            Configurar
           </Button>
           {unread > 0 && (
             <Button variant="outline" size="sm" onClick={() => doMarkAll()} className="gap-1.5">

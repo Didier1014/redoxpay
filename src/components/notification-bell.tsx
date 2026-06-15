@@ -1,6 +1,7 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { Bell, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -26,6 +27,7 @@ const typeIcons: Record<string, string> = {
 };
 
 export function NotificationBell() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const fetchList = useServerFn(listNotifications);
@@ -108,6 +110,15 @@ export function NotificationBell() {
             </div>
           </ScrollArea>
         )}
+        <div className="border-t border-white/5 p-2">
+          <button
+            onClick={() => navigate({ to: "/dashboard/notifications/config" })}
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-colors"
+          >
+            <Settings2 className="h-3.5 w-3.5" />
+            Configurar notificações
+          </button>
+        </div>
       </PopoverContent>
     </Popover>
   );
