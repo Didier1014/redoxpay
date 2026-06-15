@@ -58,13 +58,13 @@ function Overview() {
           </div>
           <Badge tone="success" className="mt-2 inline-flex">↗ +100% <span className="text-muted-foreground font-normal ml-1">vs mês anterior</span></Badge>
 
-          <div className="mt-5 h-2 rounded-full overflow-hidden bg-secondary flex">
-            <div className="h-full" style={{ width: `${mpesaPct}%`, background: "#e11d48" }} />
-            <div className="h-full" style={{ width: `${emolaPct}%`, background: "#f59e0b" }} />
+          <div className="mt-5 h-2 rounded-full overflow-hidden bg-muted flex">
+            <div className="h-full rounded-l-full" style={{ width: `${mpesaPct}%`, background: "var(--primary)" }} />
+            <div className="h-full rounded-r-full" style={{ width: `${emolaPct}%`, background: "color-mix(in oklab, var(--foreground) 30%, transparent)" }} />
           </div>
           <div className="mt-2 flex items-center justify-between text-xs">
-            <span className="flex items-center gap-1.5"><Dot color="#e11d48" /> M-Pesa {fmtMT(mpesaSum)} MT</span>
-            <span className="flex items-center gap-1.5"><Dot color="#f59e0b" /> e-Mola {fmtMT(emolaSum)} MT</span>
+            <span className="flex items-center gap-1.5"><Dot color="var(--primary)" /> M-Pesa {fmtMT(mpesaSum)} MT</span>
+            <span className="flex items-center gap-1.5"><Dot color="color-mix(in oklab, var(--foreground) 40%, transparent)" /> e-Mola {fmtMT(emolaSum)} MT</span>
           </div>
           <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Disponível p/ saque</span>
@@ -79,8 +79,8 @@ function Overview() {
           <Smartphone className="h-3.5 w-3.5" /> Carteiras móveis
         </div>
         <div className="mt-3 space-y-2">
-          <WalletRow color="#e11d48" bg="#fff1f2" letter="M" name="M-Pesa" sub="Vodacom" value={mpesaSum} pct={mpesaPct} />
-          <WalletRow color="#f59e0b" bg="#fffbeb" letter="e" name="e-Mola" sub="Movitel" value={emolaSum} pct={emolaPct} />
+          <WalletRow img="/brands/mpesa.png" name="M-Pesa" sub="Vodacom" value={mpesaSum} pct={mpesaPct} />
+          <WalletRow img="/brands/emola.png" name="e-Mola" sub="Movitel" value={emolaSum} pct={emolaPct} />
         </div>
       </Card>
 
@@ -105,11 +105,11 @@ function Overview() {
           <DonutChart mpesa={paid.filter(t=>t.method==='mpesa').length} emola={paid.filter(t=>t.method==='emola').length} />
         </div>
         <div className="mt-5 space-y-2 text-sm">
-          <Row><span className="flex items-center gap-2"><Dot color="#e11d48" />M-Pesa</span><span>{pct(paid.filter(t=>t.method==='mpesa').length, paid.length)}%</span></Row>
-          <Row><span className="flex items-center gap-2"><Dot color="#f59e0b" />e-Mola</span><span>{pct(paid.filter(t=>t.method==='emola').length, paid.length)}%</span></Row>
+          <Row><span className="flex items-center gap-2"><Dot color="var(--primary)" />M-Pesa</span><span>{pct(paid.filter(t=>t.method==='mpesa').length, paid.length)}%</span></Row>
+          <Row><span className="flex items-center gap-2"><Dot color="color-mix(in oklab, var(--foreground) 40%, transparent)" />e-Mola</span><span>{pct(paid.filter(t=>t.method==='emola').length, paid.length)}%</span></Row>
           <div className="pt-2 mt-2 border-t border-border flex items-center justify-between">
             <span className="text-muted-foreground">Falhas</span>
-            <span className="text-[#e11d48] font-semibold">{txs.filter(t=>t.status==='failed').length} ({pct(txs.filter(t=>t.status==='failed').length, txs.length)}%)</span>
+            <span className="text-destructive font-semibold">{txs.filter(t=>t.status==='failed').length} ({pct(txs.filter(t=>t.status==='failed').length, txs.length)}%)</span>
           </div>
         </div>
       </Card>
@@ -144,7 +144,9 @@ function Overview() {
                     <div className="text-[11px] text-muted-foreground">{t.customer_phone}</div>
                   </td>
                   <td className="py-3 pr-2">
-                    <span className={`text-xs font-semibold ${t.method === 'mpesa' ? 'text-[#e11d48]' : t.method === 'emola' ? 'text-[#f59e0b]' : 'text-foreground'}`}>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-foreground/70">
+                      {t.method === 'mpesa' && <img src="/brands/mpesa.png" alt="" className="w-4 h-4" />}
+                      {t.method === 'emola' && <img src="/brands/emola.png" alt="" className="w-4 h-4" />}
                       {t.method === 'mpesa' ? 'M-PESA' : t.method === 'emola' ? 'E-MOLA' : 'CARTÃO'}
                     </span>
                   </td>
@@ -157,9 +159,9 @@ function Overview() {
                     )}
                   </td>
                   <td className="py-3 text-right">
-                    {t.status === 'paid' && <span className="inline-flex items-center gap-1 text-xs text-emerald-600"><Dot color="#10b981" />Sucesso</span>}
-                    {t.status === 'failed' && <span className="inline-flex items-center gap-1 text-xs text-[#e11d48]"><Dot color="#e11d48" />Falhou</span>}
-                    {t.status === 'pending' && <span className="inline-flex items-center gap-1 text-xs text-amber-600"><Dot color="#f59e0b" />Pendente</span>}
+                    {t.status === 'paid' && <span className="inline-flex items-center gap-1 text-xs text-success"><Dot color="var(--success)" />Sucesso</span>}
+                    {t.status === 'failed' && <span className="inline-flex items-center gap-1 text-xs text-destructive"><Dot color="var(--destructive)" />Falhou</span>}
+                    {t.status === 'pending' && <span className="inline-flex items-center gap-1 text-xs text-foreground/50"><Dot color="color-mix(in oklab, var(--foreground) 40%, transparent)" />Pendente</span>}
                   </td>
                 </tr>
               )})}
@@ -178,7 +180,7 @@ function Overview() {
           <SumLine label="Taxas totais" value={`${fmtMT(totalVol * 0.039)} MT`} />
           <SumLine label="Receita líquida" value={`${fmtMT(liquid)} MT`} />
           <SumLine label="Transações" value={String(stats?.total_tx ?? 0)} />
-          <SumLine label="Falhas" value={`${txs.filter(t=>t.status==='failed').length} (${pct(txs.filter(t=>t.status==='failed').length, txs.length)}%)`} valueClass="text-[#e11d48] font-semibold" />
+          <SumLine label="Falhas" value={`${txs.filter(t=>t.status==='failed').length} (${pct(txs.filter(t=>t.status==='failed').length, txs.length)}%)`} valueClass="text-destructive font-semibold" />
         </ul>
       </Card>
     </div>
@@ -202,24 +204,24 @@ function KpiRow({ icon: Icon, label, value, trail, iconBg = "bg-secondary", icon
   );
 }
 
-function WalletRow({ color, bg, letter, name, sub, value, pct }: { color: string; bg: string; letter: string; name: string; sub: string; value: number; pct: number }) {
+function WalletRow({ img, name, sub, value, pct }: { img: string; name: string; sub: string; value: number; pct: number }) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: bg }}>
-      <div className="h-10 w-10 rounded-full flex items-center justify-center text-white font-semibold" style={{ background: color }}>{letter}</div>
+    <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+      <img src={img} alt={name} className="h-10 w-10 shrink-0" />
       <div className="flex-1">
         <p className="font-medium">{name}</p>
         <p className="text-xs text-muted-foreground">{sub}</p>
       </div>
       <div className="text-right">
         <p className="font-semibold">{fmtMT(value)},<span className="text-muted-foreground text-xs">00</span></p>
-        <p className="text-xs" style={{ color }}>{pct.toFixed(1)}%</p>
+        <p className="text-xs text-foreground/60">{pct.toFixed(1)}%</p>
       </div>
     </div>
   );
 }
 
 function Badge({ tone, children, className = "" }: { tone: "success" | "muted"; children: React.ReactNode; className?: string }) {
-  const cls = tone === "success" ? "bg-emerald-50 text-emerald-700" : "bg-secondary text-foreground";
+  const cls = tone === "success" ? "bg-success/15 text-success" : "bg-secondary text-foreground";
   return <span className={`text-xs font-medium px-2 py-1 rounded-md ${cls} ${className}`}>{children}</span>;
 }
 
@@ -258,14 +260,14 @@ function LineChart({ data }: { data: { label: string; v: number }[] }) {
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-44">
       {ticks.map((t, i) => (
         <g key={i}>
-          <line x1={P} x2={W-P} y1={H-P - t*(H-P*2)} y2={H-P - t*(H-P*2)} stroke="#f1f5f9" />
+          <line x1={P} x2={W-P} y1={H-P - t*(H-P*2)} y2={H-P - t*(H-P*2)} stroke="var(--border)" />
         </g>
       ))}
-      <path d={area} fill="rgba(15,23,42,0.04)" />
-      <path d={path} stroke="#0f172a" strokeWidth="1.5" fill="none" />
-      {pts.map((p, i) => <circle key={i} cx={p[0]} cy={p[1]} r="2" fill="#0f172a" />)}
+      <path d={area} fill="color-mix(in oklab, var(--foreground) 5%, transparent)" />
+      <path d={path} stroke="var(--foreground)" strokeWidth="1.5" fill="none" />
+      {pts.map((p, i) => <circle key={i} cx={p[0]} cy={p[1]} r="2" fill="var(--foreground)" />)}
       {xLabels.map((l, i) => (
-        <text key={i} x={P + (i/(xLabels.length-1)) * (W - P*2)} y={H-8} fontSize="9" fill="#94a3b8" textAnchor="middle">{l}</text>
+        <text key={i} x={P + (i/(xLabels.length-1)) * (W - P*2)} y={H-8} fontSize="9" fill="var(--muted-foreground)" textAnchor="middle">{l}</text>
       ))}
     </svg>
   );
@@ -292,13 +294,13 @@ function DonutChart({ mpesa, emola }: { mpesa: number; emola: number }) {
   const mPct = mpesa / total, ePct = emola / total;
   return (
     <svg viewBox="0 0 180 180" className="w-44 h-44">
-      <circle cx="90" cy="90" r={r} fill="none" stroke="#f1f5f9" strokeWidth="16" />
-      <circle cx="90" cy="90" r={r} fill="none" stroke="#e11d48" strokeWidth="16"
+      <circle cx="90" cy="90" r={r} fill="none" stroke="var(--border)" strokeWidth="16" />
+      <circle cx="90" cy="90" r={r} fill="none" stroke="var(--primary)" strokeWidth="16"
         strokeDasharray={`${c*mPct} ${c}`} transform="rotate(-90 90 90)" strokeLinecap="butt" />
-      <circle cx="90" cy="90" r={r} fill="none" stroke="#f59e0b" strokeWidth="16"
+      <circle cx="90" cy="90" r={r} fill="none" stroke="color-mix(in oklab, var(--foreground) 25%, transparent)" strokeWidth="16"
         strokeDasharray={`${c*ePct} ${c}`} strokeDashoffset={-c*mPct} transform="rotate(-90 90 90)" strokeLinecap="butt" />
-      <text x="90" y="88" textAnchor="middle" fontSize="22" fontWeight="600" fill="#0f172a">{mpesa+emola}</text>
-      <text x="90" y="108" textAnchor="middle" fontSize="10" fill="#94a3b8">transações</text>
+      <text x="90" y="88" textAnchor="middle" fontSize="22" fontWeight="600" fill="var(--foreground)">{mpesa+emola}</text>
+      <text x="90" y="108" textAnchor="middle" fontSize="10" fill="var(--muted-foreground)">transações</text>
     </svg>
   );
 }

@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, redirect, Link, useRouter } from "@tanstack/re
 import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, Package, Receipt, Wallet, LogOut, Menu, X,
-  PlusCircle, BarChart3, Plug, BookOpen, Settings as SettingsIcon, Moon,
+  PlusCircle, BarChart3, Plug, BookOpen, Settings as SettingsIcon, Sun, Moon,
   Users, Link2, Code2, MessageSquare, RotateCcw, User, Shield, Bell,
 } from "lucide-react";
 import { NotificationBell } from "@/components/notification-bell";
@@ -96,6 +96,11 @@ function AuthedShell() {
 }
 
 function DrawerContent({ close, onSignOut }: { close: () => void; onSignOut: () => void }) {
+  const [isDark, setIsDark] = useState(true);
+  function toggleTheme() {
+    document.documentElement.classList.toggle('dark');
+    setIsDark(!isDark);
+  }
   return (
     <div className="flex flex-col h-full bg-sidebar relative">
       <div aria-hidden className="absolute top-0 left-0 h-40 w-full bg-gradient-to-b from-primary/15 to-transparent pointer-events-none" />
@@ -127,8 +132,8 @@ function DrawerContent({ close, onSignOut }: { close: () => void; onSignOut: () 
       </nav>
 
       <div className="mt-auto border-t border-white/5 p-3 space-y-1">
-        <button onClick={() => document.documentElement.classList.toggle('dark')} className="w-full flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-foreground/60 hover:bg-white/5">
-          <Moon className="h-4 w-4" /> Alternar tema
+        <button onClick={toggleTheme} className="w-full flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-foreground/60 hover:bg-white/5">
+          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />} {isDark ? "Modo claro" : "Modo escuro"}
         </button>
         <button onClick={() => { onSignOut(); close(); }} className="w-full flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-foreground/60 hover:bg-white/5">
           <LogOut className="h-4 w-4" /> Sair
