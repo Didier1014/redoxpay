@@ -93,14 +93,39 @@ export const Route = createFileRoute("/api/public/rlx-webhook")({
               .update({ balance_mzn: Number(prof?.balance_mzn ?? 0) + Number(tx.net_mzn) })
               .eq("id", tx.user_id);
 
-            // Insert notification for the merchant
-            await supabaseAdmin.from("notifications").insert({
-              user_id: tx.user_id,
-              type: "sale",
-              title: "Nova venda",
-              message: `Pagamento de ${Number(tx.amount_mzn).toLocaleString("pt-MZ", { style: "currency", currency: "MZN" })} recebido`,
-              data: { transaction_id: tx.id },
-            }).catch(() => {});
+            // Read the merchant's preferences from user_metadata
+            let currency = "MZN";
+            let notificationsEnabled = true;
+            try {
+              const { data: user } = await supabaseAdmin.auth.admin.getUserById(tx.user_id);
+              const meta = user?.user?.user_metadata ?? {};
+              if (meta.currency) currency = String(meta.currency);
+              if (meta.notifications_enabled === false) notificationsEnabled = false;
+            } catch {}
+
+            if (notificationsEnabled) {
+              // Fetch product name for the notification
+              let productName: string | null = null;
+              if (tx.product_id) {
+                const { data: prod } = await supabaseAdmin
+                  .from("products").select("name").eq("id", tx.product_id).maybeSingle();
+                productName = prod?.name ?? null;
+              }
+
+              await supabaseAdmin.from("notifications").insert({
+                user_id: tx.user_id,
+                type: "sale",
+                title: "Nova venda",
+                message: `Pagamento de ${Number(tx.amount_mzn).toLocaleString("pt-MZ", { style: "currency", currency })} recebido`,
+                data: {
+                  transaction_id: tx.id,
+                  amount_mzn: Number(tx.amount_mzn),
+                  currency,
+                  customer_name: tx.customer_name ?? null,
+                  product_name: productName,
+                },
+              }).catch(() => {});
+            }
           }
         }
         return new Response("ok");

@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { listNotifications, markNotificationRead, markAllNotificationsRead } from "@/lib/notifications.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCheck } from "lucide-react";
+import { CheckCheck, Settings2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard/notifications")({
   component: NotificationsPage,
@@ -62,12 +62,20 @@ function NotificationsPage() {
             {notifications.length} no total{unread > 0 && ` · ${unread} não lida${unread > 1 ? "s" : ""}`}
           </p>
         </div>
-        {unread > 0 && (
-          <Button variant="outline" size="sm" onClick={() => doMarkAll()} className="gap-1.5">
-            <CheckCheck className="h-4 w-4" />
-            Marcar todas lidas
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/dashboard/notifications/config" className="gap-1.5">
+              <Settings2 className="h-4 w-4" />
+              Configurar
+            </Link>
           </Button>
-        )}
+          {unread > 0 && (
+            <Button variant="outline" size="sm" onClick={() => doMarkAll()} className="gap-1.5">
+              <CheckCheck className="h-4 w-4" />
+              Marcar todas lidas
+            </Button>
+          )}
+        </div>
       </div>
 
       {notifications.length === 0 ? (

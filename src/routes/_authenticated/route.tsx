@@ -6,6 +6,7 @@ import {
   Users, Link2, Code2, MessageSquare, RotateCcw, User, Shield, Bell,
 } from "lucide-react";
 import { NotificationBell } from "@/components/notification-bell";
+import { FloatingSaleNotification } from "@/components/floating-sale-notification";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
@@ -85,6 +86,7 @@ function AuthedShell() {
       <main className="max-w-3xl mx-auto px-4 py-5 pb-24">
         <Outlet />
       </main>
+      <FloatingSaleNotification />
     </div>
   );
 }

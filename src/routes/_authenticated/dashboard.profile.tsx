@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { User, Save, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "@tanstack/react-router";
+import { getCurrencyPref, updateUserPreferences, type Currency } from "@/lib/notifications.functions";
 
 export const Route = createFileRoute("/_authenticated/dashboard/profile")({ component: Page });
 
@@ -17,6 +19,8 @@ function Page() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [email, setEmail] = useState("");
+  const [currency, setCurrency] = useState<Currency>("MZN");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [form, setForm] = useState({ full_name: "", business_name: "", whatsapp: "", city: "", account_type: "person" });
 
   useEffect(() => {
@@ -26,6 +30,9 @@ function Page() {
       setEmail(u.user.email || "");
       const { data: p } = await supabase.from("profiles").select("*").eq("id", u.user.id).single();
       if (p) setForm({ full_name: p.full_name || "", business_name: p.business_name || "", whatsapp: p.whatsapp || "", city: p.city || "", account_type: p.account_type || "person" });
+      const prefs = await getCurrencyPref();
+      setCurrency(prefs.currency);
+      setNotificationsEnabled(prefs.notifications_enabled);
       setLoading(false);
     })();
   }, []);
@@ -35,8 +42,10 @@ function Page() {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) { setSaving(false); return; }
     const { error } = await supabase.from("profiles").update(form).eq("id", u.user.id);
+    if (error) { setSaving(false); toast.error(error.message); return; }
+    const r = await updateUserPreferences({ currency, notifications_enabled: notificationsEnabled }).catch(() => null);
     setSaving(false);
-    if (error) toast.error(error.message); else toast.success("Perfil atualizado");
+    if (r) toast.success("Perfil atualizado"); else toast.error("Erro ao guardar preferências");
   }
   async function signOut() {
     await supabase.auth.signOut();
@@ -54,7 +63,7 @@ function Page() {
 
       <Card className="p-5 bg-white/5 border-white/10 rounded-2xl">
         <div className="flex items-center gap-3 mb-4">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center shadow-[0_0_30px_-8px_var(--primary-glow)]">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center shadow-[0_0_30px_-8px(var(--primary-glow))]">
             <User className="h-7 w-7 text-white" />
           </div>
           <div className="min-w-0">
@@ -79,6 +88,22 @@ function Page() {
                 <SelectItem value="company">Empresa</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div>
+            <Label>Moeda preferida (notificações)</Label>
+            <Select value={currency} onValueChange={(v) => setCurrency(v as Currency)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="MZN">MT (Metical)</SelectItem>
+                <SelectItem value="USD">$ (Dólar)</SelectItem>
+                <SelectItem value="ZAR">R (Rand)</SelectItem>
+                <SelectItem value="EUR">€ (Euro)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center justify-between">
+            <Label className="cursor-pointer">Receber notificações</Label>
+            <Switch checked={notificationsEnabled} onCheckedChange={setNotificationsEnabled} />
           </div>
           <Button className="w-full rounded-xl bg-gradient-to-r from-primary to-primary-glow text-white" disabled={saving} onClick={save}>
             <Save className="h-4 w-4 mr-2" /> Guardar

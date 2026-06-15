@@ -32,6 +32,9 @@ import { Route as AuthenticatedDashboardIntegrationsRouteImport } from './routes
 import { Route as AuthenticatedDashboardCustomersRouteImport } from './routes/_authenticated/dashboard.customers'
 import { Route as AuthenticatedDashboardApiRouteImport } from './routes/_authenticated/dashboard.api'
 import { Route as AuthenticatedDashboardAdminRouteImport } from './routes/_authenticated/dashboard.admin'
+import { Route as ApiPublicNotificationsPollRouteImport } from './routes/api/public/notifications.poll'
+import { Route as ApiPublicEmbedScriptRouteImport } from './routes/api/public/embed.script'
+import { Route as AuthenticatedDashboardNotificationsConfigRouteImport } from './routes/_authenticated/dashboard.notifications.config'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -163,6 +166,23 @@ const AuthenticatedDashboardAdminRoute =
     path: '/dashboard/admin',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicNotificationsPollRoute =
+  ApiPublicNotificationsPollRouteImport.update({
+    id: '/api/public/notifications/poll',
+    path: '/api/public/notifications/poll',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicEmbedScriptRoute = ApiPublicEmbedScriptRouteImport.update({
+  id: '/api/public/embed/script',
+  path: '/api/public/embed/script',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedDashboardNotificationsConfigRoute =
+  AuthenticatedDashboardNotificationsConfigRouteImport.update({
+    id: '/config',
+    path: '/config',
+    getParentRoute: () => AuthenticatedDashboardNotificationsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -175,7 +195,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/customers': typeof AuthenticatedDashboardCustomersRoute
   '/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
   '/dashboard/new-transaction': typeof AuthenticatedDashboardNewTransactionRoute
-  '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRoute
+  '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRouteWithChildren
   '/dashboard/payment-links': typeof AuthenticatedDashboardPaymentLinksRoute
   '/dashboard/products': typeof AuthenticatedDashboardProductsRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
@@ -187,6 +207,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/withdrawals': typeof AuthenticatedDashboardWithdrawalsRoute
   '/api/public/rlx-webhook': typeof ApiPublicRlxWebhookRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/dashboard/notifications/config': typeof AuthenticatedDashboardNotificationsConfigRoute
+  '/api/public/embed/script': typeof ApiPublicEmbedScriptRoute
+  '/api/public/notifications/poll': typeof ApiPublicNotificationsPollRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -199,7 +222,7 @@ export interface FileRoutesByTo {
   '/dashboard/customers': typeof AuthenticatedDashboardCustomersRoute
   '/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
   '/dashboard/new-transaction': typeof AuthenticatedDashboardNewTransactionRoute
-  '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRoute
+  '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRouteWithChildren
   '/dashboard/payment-links': typeof AuthenticatedDashboardPaymentLinksRoute
   '/dashboard/products': typeof AuthenticatedDashboardProductsRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
@@ -211,6 +234,9 @@ export interface FileRoutesByTo {
   '/dashboard/withdrawals': typeof AuthenticatedDashboardWithdrawalsRoute
   '/api/public/rlx-webhook': typeof ApiPublicRlxWebhookRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/dashboard/notifications/config': typeof AuthenticatedDashboardNotificationsConfigRoute
+  '/api/public/embed/script': typeof ApiPublicEmbedScriptRoute
+  '/api/public/notifications/poll': typeof ApiPublicNotificationsPollRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -225,7 +251,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/customers': typeof AuthenticatedDashboardCustomersRoute
   '/_authenticated/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
   '/_authenticated/dashboard/new-transaction': typeof AuthenticatedDashboardNewTransactionRoute
-  '/_authenticated/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRoute
+  '/_authenticated/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRouteWithChildren
   '/_authenticated/dashboard/payment-links': typeof AuthenticatedDashboardPaymentLinksRoute
   '/_authenticated/dashboard/products': typeof AuthenticatedDashboardProductsRoute
   '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
@@ -237,6 +263,9 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/withdrawals': typeof AuthenticatedDashboardWithdrawalsRoute
   '/api/public/rlx-webhook': typeof ApiPublicRlxWebhookRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/_authenticated/dashboard/notifications/config': typeof AuthenticatedDashboardNotificationsConfigRoute
+  '/api/public/embed/script': typeof ApiPublicEmbedScriptRoute
+  '/api/public/notifications/poll': typeof ApiPublicNotificationsPollRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -263,6 +292,9 @@ export interface FileRouteTypes {
     | '/dashboard/withdrawals'
     | '/api/public/rlx-webhook'
     | '/dashboard/'
+    | '/dashboard/notifications/config'
+    | '/api/public/embed/script'
+    | '/api/public/notifications/poll'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -287,6 +319,9 @@ export interface FileRouteTypes {
     | '/dashboard/withdrawals'
     | '/api/public/rlx-webhook'
     | '/dashboard'
+    | '/dashboard/notifications/config'
+    | '/api/public/embed/script'
+    | '/api/public/notifications/poll'
   id:
     | '__root__'
     | '/'
@@ -312,6 +347,9 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/withdrawals'
     | '/api/public/rlx-webhook'
     | '/_authenticated/dashboard/'
+    | '/_authenticated/dashboard/notifications/config'
+    | '/api/public/embed/script'
+    | '/api/public/notifications/poll'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -322,6 +360,8 @@ export interface RootRouteChildren {
   CSlugRoute: typeof CSlugRoute
   LSlugRoute: typeof LSlugRoute
   ApiPublicRlxWebhookRoute: typeof ApiPublicRlxWebhookRoute
+  ApiPublicEmbedScriptRoute: typeof ApiPublicEmbedScriptRoute
+  ApiPublicNotificationsPollRoute: typeof ApiPublicNotificationsPollRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -487,8 +527,44 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/notifications/poll': {
+      id: '/api/public/notifications/poll'
+      path: '/api/public/notifications/poll'
+      fullPath: '/api/public/notifications/poll'
+      preLoaderRoute: typeof ApiPublicNotificationsPollRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/embed/script': {
+      id: '/api/public/embed/script'
+      path: '/api/public/embed/script'
+      fullPath: '/api/public/embed/script'
+      preLoaderRoute: typeof ApiPublicEmbedScriptRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/dashboard/notifications/config': {
+      id: '/_authenticated/dashboard/notifications/config'
+      path: '/config'
+      fullPath: '/dashboard/notifications/config'
+      preLoaderRoute: typeof AuthenticatedDashboardNotificationsConfigRouteImport
+      parentRoute: typeof AuthenticatedDashboardNotificationsRoute
+    }
   }
 }
+
+interface AuthenticatedDashboardNotificationsRouteChildren {
+  AuthenticatedDashboardNotificationsConfigRoute: typeof AuthenticatedDashboardNotificationsConfigRoute
+}
+
+const AuthenticatedDashboardNotificationsRouteChildren: AuthenticatedDashboardNotificationsRouteChildren =
+  {
+    AuthenticatedDashboardNotificationsConfigRoute:
+      AuthenticatedDashboardNotificationsConfigRoute,
+  }
+
+const AuthenticatedDashboardNotificationsRouteWithChildren =
+  AuthenticatedDashboardNotificationsRoute._addFileChildren(
+    AuthenticatedDashboardNotificationsRouteChildren,
+  )
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardAdminRoute: typeof AuthenticatedDashboardAdminRoute
@@ -496,7 +572,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardCustomersRoute: typeof AuthenticatedDashboardCustomersRoute
   AuthenticatedDashboardIntegrationsRoute: typeof AuthenticatedDashboardIntegrationsRoute
   AuthenticatedDashboardNewTransactionRoute: typeof AuthenticatedDashboardNewTransactionRoute
-  AuthenticatedDashboardNotificationsRoute: typeof AuthenticatedDashboardNotificationsRoute
+  AuthenticatedDashboardNotificationsRoute: typeof AuthenticatedDashboardNotificationsRouteWithChildren
   AuthenticatedDashboardPaymentLinksRoute: typeof AuthenticatedDashboardPaymentLinksRoute
   AuthenticatedDashboardProductsRoute: typeof AuthenticatedDashboardProductsRoute
   AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
@@ -518,7 +594,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardNewTransactionRoute:
     AuthenticatedDashboardNewTransactionRoute,
   AuthenticatedDashboardNotificationsRoute:
-    AuthenticatedDashboardNotificationsRoute,
+    AuthenticatedDashboardNotificationsRouteWithChildren,
   AuthenticatedDashboardPaymentLinksRoute:
     AuthenticatedDashboardPaymentLinksRoute,
   AuthenticatedDashboardProductsRoute: AuthenticatedDashboardProductsRoute,
@@ -546,6 +622,8 @@ const rootRouteChildren: RootRouteChildren = {
   CSlugRoute: CSlugRoute,
   LSlugRoute: LSlugRoute,
   ApiPublicRlxWebhookRoute: ApiPublicRlxWebhookRoute,
+  ApiPublicEmbedScriptRoute: ApiPublicEmbedScriptRoute,
+  ApiPublicNotificationsPollRoute: ApiPublicNotificationsPollRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
