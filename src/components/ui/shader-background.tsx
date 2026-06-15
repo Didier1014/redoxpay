@@ -24,9 +24,9 @@ const ShaderBackground = () => {
     const float minorLineFrequency = 1.0;
     const vec4 gridColor = vec4(0.8, 0.10, 0.10, 0.6);
     const float scale = 5.0;
-    const vec4 lineColor = vec4(0.9, 0.15, 0.15, 1.0);
-    const float minLineWidth = 0.012;
-    const float maxLineWidth = 0.25;
+    const vec4 lineColor = vec4(1.0, 0.20, 0.20, 1.0);
+    const float minLineWidth = 0.03;
+    const float maxLineWidth = 0.4;
     const float lineSpeed = 1.0 * overallSpeed;
     const float lineAmplitude = 1.2;
     const float lineFrequency = 0.25;
@@ -69,14 +69,14 @@ const ShaderBackground = () => {
       vec2 space = (fragCoord - iResolution.xy / 2.0) / iResolution.x * 2.0 * scale;
 
       float horizontalFade = 1.0 - (cos(uv.x * 6.28) * 0.5 + 0.5);
-      float verticalFade = 1.0 - (cos(uv.y * 6.28) * 0.5 + 0.5);
+      float verticalFade = 1.0 - (cos(uv.y * 6.28) * 0.25 + 0.25);
 
       space.y += random(space.x * warpFrequency + iTime * warpSpeed) * warpAmplitude * (0.5 + horizontalFade);
       space.x += random(space.y * warpFrequency + iTime * warpSpeed + 2.0) * warpAmplitude * horizontalFade;
 
       vec4 lines = vec4(0.0);
-      vec4 bgColor1 = vec4(0.06, 0.0, 0.0, 1.0);
-      vec4 bgColor2 = vec4(0.15, 0.02, 0.02, 1.0);
+      vec4 bgColor1 = vec4(0.10, 0.0, 0.0, 1.0);
+      vec4 bgColor2 = vec4(0.25, 0.04, 0.04, 1.0);
 
       for(int l = 0; l < linesPerGroup; l++) {
         float normalizedLineIndex = float(l) / float(linesPerGroup);
@@ -206,7 +206,7 @@ const ShaderBackground = () => {
   }, []);
 
   return (
-    <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full -z-20" />
+    <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full -z-20 bg-[#080003]" />
   );
 };
 
