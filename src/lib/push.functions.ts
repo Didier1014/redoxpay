@@ -13,13 +13,14 @@ export const subscribePush = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("push_subscriptions").upsert({
-      user_id: context.userId,
-      endpoint: data.endpoint,
-      p256dh: data.p256dh,
-      auth: data.auth,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
+    const { data: user } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+    const meta = user?.user?.user_metadata ?? {};
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(context.userId, {
+      user_metadata: {
+        ...meta,
+        push_subscription: { endpoint: data.endpoint, p256dh: data.p256dh, auth: data.auth },
+      },
+    });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -28,8 +29,15 @@ export const unsubscribePush = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("push_subscriptions")
-      .delete().eq("user_id", context.userId);
+    const { data: user } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+    const meta = user?.user?.user_metadata ?? {};
+    const { [Symbol("push_subscription")]: _, ...rest } = meta;
+    const cleaned = Object.fromEntries(
+      Object.entries(meta).filter(([k]) => k !== "push_subscription")
+    );
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(context.userId, {
+      user_metadata: cleaned,
+    });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -41,9 +49,11 @@ export async function sendPushToUser(
   body: string,
   url?: string,
 ) {
-  const { data: subs } = await supabaseAdmin
-    .from("push_subscriptions").select("endpoint,p256dh,auth").eq("user_id", userId).maybeSingle();
-  if (!subs) return;
+  const { data: user } = await supabaseAdmin.auth.admin.getUserById(userId);
+  const sub = user?.user?.user_metadata?.push_subscription as
+    | { endpoint: string; p256dh: string; auth: string }
+    | undefined;
+  if (!sub) return;
 
   const vapidPublic = process.env.VAPID_PUBLIC_KEY;
   const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
@@ -54,12 +64,15 @@ export async function sendPushToUser(
 
   try {
     await webpush.sendNotification({
-      endpoint: subs.endpoint,
-      keys: { p256dh: subs.p256dh, auth: subs.auth },
+      endpoint: sub.endpoint,
+      keys: { p256dh: sub.p256dh, auth: sub.auth },
     }, JSON.stringify({ title, body, url }));
   } catch {
-    // subscription expired or invalid — remove it
-    await supabaseAdmin.from("push_subscriptions")
-      .delete().eq("user_id", userId);
+    // subscription expired — remove it from metadata
+    const meta = user?.user?.user_metadata ?? {};
+    const cleaned = Object.fromEntries(
+      Object.entries(meta).filter(([k]) => k !== "push_subscription")
+    );
+    await supabaseAdmin.auth.admin.updateUserById(userId, { user_metadata: cleaned });
   }
 }
