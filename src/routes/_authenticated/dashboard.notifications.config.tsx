@@ -9,7 +9,8 @@ import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { updateUserPreferences, sendTestNotification, type Currency } from "@/lib/notifications.functions";
-import { Copy, Bell, Play, Palette, Volume2 } from "lucide-react";
+import { PushToggle } from "@/components/push-setup";
+import { Copy, Bell, Play, Palette, Volume2, Smartphone } from "lucide-react";
 
 const currencies: { value: Currency; label: string }[] = [
   { value: "MZN", label: "MT (Metical)" },
@@ -112,9 +113,14 @@ function NotificationsConfigPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bell className="h-5 w-5 text-primary" />
-            <Label className="font-medium cursor-pointer">Ativar notificações</Label>
+            <Label className="font-medium cursor-pointer">Notificações no site</Label>
           </div>
           <Switch checked={enabled} onCheckedChange={setEnabled} />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Smartphone className="h-5 w-5 text-muted-foreground shrink-0" />
+          <PushToggle />
         </div>
 
         <div>

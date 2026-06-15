@@ -134,6 +134,16 @@ export const Route = createFileRoute("/api/public/rlx-webhook")({
                   product_name: productName,
                 },
               }).catch(() => {});
+
+              // 📲 Send PWA push notification
+              const { sendPushToUser } = await import("@/lib/push.functions");
+              const formattedAmount = Number(tx.amount_mzn).toLocaleString("pt-MZ", { style: "currency", currency });
+              sendPushToUser(
+                supabaseAdmin, tx.user_id,
+                "Nova venda!",
+                `${formattedAmount} — ${tx.customer_name || "Cliente"}${productName ? ` — ${productName}` : ""}`,
+                "/dashboard/transactions",
+              ).catch(() => {});
             }
 
             // 🔗 Send sale data to Utmify
