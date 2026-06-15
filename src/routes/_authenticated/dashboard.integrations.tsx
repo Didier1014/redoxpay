@@ -85,7 +85,7 @@ const INTEGRATIONS: Integration[] = [
 
 const fmtBaseUrl = typeof window !== "undefined" ? window.location.origin : "";
 
-const REDOX_WEBHOOK_URL = `${fmtBaseUrl}/api/public/rlx-webhook`;
+const REDOX_WEBHOOK_URL = `${fmtBaseUrl}/api/public/webhook-payment`;
 
 function IntegrationsPage() {
   const qc = useQueryClient();

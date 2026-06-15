@@ -39,7 +39,7 @@ export const getAdminOverview = createServerFn({ method: "GET" })
     ]);
 
     const totalVolume = (vol ?? []).reduce((a: number, r: any) => a + Number(r.amount_mzn || 0), 0);
-    // Profit = seller_fee (15%+15) - rlx_cost (12%+12) = 3% + 3 MT per transaction
+    // Lucro = seller_fee (15%+15) - custo_processador (12%+12) = 3% + 3 MT por transacção
     const totalProfit = (fees ?? []).reduce((a: number, r: any) => {
       const amt = Number(r.amount_mzn || 0);
       const sellerFee = Math.round((amt * 0.15 + 15) * 100) / 100;

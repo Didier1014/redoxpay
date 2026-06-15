@@ -53,10 +53,10 @@ export const payLink = createServerFn({ method: "POST" })
     }).select().single();
     if (error) throw new Error(error.message);
 
-    // Fire-and-forget RLX pay — Vercel Hobby kills functions after 10s, RLX takes 30-60s.
+    // Fire-and-forget — Vercel Hobby kills functions after 10s, processador demora 30-60s.
     if (token) {
       const phone = normalizePhone(data.customer_phone);
-      const webhookUrl = `${process.env.SITE_URL ?? "https://redoxpay.vercel.app"}/api/public/rlx-webhook?tx_id=${tx.id}`;
+      const webhookUrl = `${process.env.SITE_URL ?? "https://redoxpay.vercel.app"}/api/public/webhook-payment?tx_id=${tx.id}`;
       fetch("https://checkout.rlxl.ink/api.php", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },

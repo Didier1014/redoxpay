@@ -35,7 +35,7 @@ const positions = [
 ];
 
 const webhookUrl = typeof window !== "undefined"
-  ? `${window.location.origin}/api/public/rlx-webhook`
+  ? `${window.location.origin}/api/public/webhook-payment`
   : "";
 
 function SettingsPage() {

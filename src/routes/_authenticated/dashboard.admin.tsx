@@ -132,7 +132,7 @@ function AdminPage() {
             <div className="space-y-2 text-sm">
               <Row label="Gateway" value="Online" color="text-emerald-400" />
               <Row label="Base de dados" value="Operacional" color="text-emerald-400" />
-              <Row label="Webhook" value="https://redoxpay.vercel.app/api/public/rlx-webhook" color="text-muted-foreground" mono />
+              <Row label="Webhook" value="https://redoxpay.vercel.app/api/public/webhook-payment" color="text-muted-foreground" mono />
             </div>
           </Card>
         </>
@@ -193,7 +193,7 @@ function AdminPage() {
                 {t.status === 'paid' && (
                   <p className="text-[11px] text-muted-foreground mt-0.5">
                     <span className="text-rose-500">Tx vendedor: -{fmt2(sFee)}</span> ·
-                    <span className="text-amber-500"> Custo RLX: -{fmt2(rCost)}</span>
+                    <span className="text-amber-500"> Custo proc.: -{fmt2(rCost)}</span>
                   </p>
                 )}
               </div>

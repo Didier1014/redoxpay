@@ -2,10 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-// Lightweight health check used by the dashboard to confirm RLX connectivity.
 export const checkApiStatus = createServerFn({ method: "GET" }).handler(async () => {
   const token = process.env.RLX_API_TOKEN;
-  if (!token) return { ok: false, configured: false, latency_ms: 0, message: "Token RLX não configurado" };
+  if (!token) return { ok: false, configured: false, latency_ms: 0, message: "Gateway não configurado" };
   const started = Date.now();
   try {
     const res = await fetch("https://checkout.rlxl.ink/api.php", {
@@ -20,7 +19,7 @@ export const checkApiStatus = createServerFn({ method: "GET" }).handler(async ()
       configured: true,
       latency_ms: latency,
       status: res.status,
-      message: res.ok ? "Gateway RLX online" : `HTTP ${res.status}`,
+      message: res.ok ? "Gateway online" : `HTTP ${res.status}`,
       sample: text.slice(0, 120),
     };
   } catch (e) {
@@ -37,7 +36,7 @@ const checkoutSchema = z.object({
   method: z.enum(["mpesa", "emola", "card"]),
 });
 
-// Seller pays 15% + 15 MT; RLX costs 12% + 12 MT; admin profit = difference.
+// Taxa do vendedor: 15% + 15 MT; custo do processador: 12% + 12 MT; margem = diferença.
 function calcFee(amount: number) {
   const seller_fee = Math.round((amount * 0.15 + 15) * 100) / 100;
   const rlx_cost = Math.round((amount * 0.12 + 12) * 100) / 100;
@@ -46,7 +45,7 @@ function calcFee(amount: number) {
   return { seller_fee, rlx_cost, admin_margin, seller_net };
 }
 
-// Normalize phone to local 9-digit format expected by RLX (e.g. 84xxxxxxx).
+// Normalizar telefone para formato local 9 dígitos.
 function normalizePhone(phone: string) {
   const digits = phone.replace(/\D/g, "");
   if (digits.startsWith("258")) return digits.slice(3);
@@ -85,12 +84,10 @@ export const createCheckout = createServerFn({ method: "POST" })
     }).select().single();
     if (tErr) throw new Error(tErr.message);
 
-    // Fire-and-forget RLX pay — Vercel Hobby kills functions after 10s, RLX takes 30-60s.
-    // Initiate request without awaiting; RLX processes async and sends webhook.
     const token = process.env.RLX_API_TOKEN;
     if (token && data.method !== "card") {
       const phone = normalizePhone(data.customer_phone);
-      const webhookUrl = `${process.env.SITE_URL ?? "https://redoxpay.vercel.app"}/api/public/rlx-webhook?tx_id=${tx.id}`;
+      const webhookUrl = `${process.env.SITE_URL ?? "https://redoxpay.vercel.app"}/api/public/webhook-payment?tx_id=${tx.id}`;
       fetch("https://checkout.rlxl.ink/api.php", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -105,7 +102,7 @@ export const createCheckout = createServerFn({ method: "POST" })
     return { id: tx.id, status: "pending", amount, fee: seller_fee, net: seller_net, message: null };
   });
 
-// Polling endpoint — checks RLX for an updated transaction status.
+// Polling endpoint — verifica estado da transacção.
 export const checkTransactionStatus = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ transaction_id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
@@ -138,8 +135,8 @@ export const checkTransactionStatus = createServerFn({ method: "POST" })
 
       if (next !== tx.status) {
         await supabaseAdmin.from("transactions").update({ status: next }).eq("id", tx.id);
-        // Balance is credited in the webhook only (which has RLX fee info).
-        // This function is a fallback for polling; webhook handles the real update.
+        // Saldo creditado apenas no webhook (que tem info das taxas).
+
       }
       if (next === "paid" || tx.status === "paid") {
         const { data: prod } = await supabaseAdmin

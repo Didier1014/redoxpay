@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as LSlugRouteImport } from './routes/l.$slug'
 import { Route as CSlugRouteImport } from './routes/c.$slug'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
+import { Route as ApiPublicWebhookPaymentRouteImport } from './routes/api/public/webhook-payment'
 import { Route as ApiPublicRlxWebhookRouteImport } from './routes/api/public/rlx-webhook'
 import { Route as AuthenticatedDashboardWithdrawalsRouteImport } from './routes/_authenticated/dashboard.withdrawals'
 import { Route as AuthenticatedDashboardTransactionsRouteImport } from './routes/_authenticated/dashboard.transactions'
@@ -77,6 +78,11 @@ const AuthenticatedDashboardIndexRoute =
     path: '/dashboard/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicWebhookPaymentRoute = ApiPublicWebhookPaymentRouteImport.update({
+  id: '/api/public/webhook-payment',
+  path: '/api/public/webhook-payment',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRlxWebhookRoute = ApiPublicRlxWebhookRouteImport.update({
   id: '/api/public/rlx-webhook',
   path: '/api/public/rlx-webhook',
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/transactions': typeof AuthenticatedDashboardTransactionsRoute
   '/dashboard/withdrawals': typeof AuthenticatedDashboardWithdrawalsRoute
   '/api/public/rlx-webhook': typeof ApiPublicRlxWebhookRoute
+  '/api/public/webhook-payment': typeof ApiPublicWebhookPaymentRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/notifications/config': typeof AuthenticatedDashboardNotificationsConfigRoute
   '/api/public/embed/script': typeof ApiPublicEmbedScriptRoute
@@ -241,6 +248,7 @@ export interface FileRoutesByTo {
   '/dashboard/transactions': typeof AuthenticatedDashboardTransactionsRoute
   '/dashboard/withdrawals': typeof AuthenticatedDashboardWithdrawalsRoute
   '/api/public/rlx-webhook': typeof ApiPublicRlxWebhookRoute
+  '/api/public/webhook-payment': typeof ApiPublicWebhookPaymentRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/dashboard/notifications/config': typeof AuthenticatedDashboardNotificationsConfigRoute
   '/api/public/embed/script': typeof ApiPublicEmbedScriptRoute
@@ -271,6 +279,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/transactions': typeof AuthenticatedDashboardTransactionsRoute
   '/_authenticated/dashboard/withdrawals': typeof AuthenticatedDashboardWithdrawalsRoute
   '/api/public/rlx-webhook': typeof ApiPublicRlxWebhookRoute
+  '/api/public/webhook-payment': typeof ApiPublicWebhookPaymentRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/dashboard/notifications/config': typeof AuthenticatedDashboardNotificationsConfigRoute
   '/api/public/embed/script': typeof ApiPublicEmbedScriptRoute
@@ -301,6 +310,7 @@ export interface FileRouteTypes {
     | '/dashboard/transactions'
     | '/dashboard/withdrawals'
     | '/api/public/rlx-webhook'
+    | '/api/public/webhook-payment'
     | '/dashboard/'
     | '/dashboard/notifications/config'
     | '/api/public/embed/script'
@@ -329,6 +339,7 @@ export interface FileRouteTypes {
     | '/dashboard/transactions'
     | '/dashboard/withdrawals'
     | '/api/public/rlx-webhook'
+    | '/api/public/webhook-payment'
     | '/dashboard'
     | '/dashboard/notifications/config'
     | '/api/public/embed/script'
@@ -358,6 +369,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/transactions'
     | '/_authenticated/dashboard/withdrawals'
     | '/api/public/rlx-webhook'
+    | '/api/public/webhook-payment'
     | '/_authenticated/dashboard/'
     | '/_authenticated/dashboard/notifications/config'
     | '/api/public/embed/script'
@@ -373,6 +385,7 @@ export interface RootRouteChildren {
   CSlugRoute: typeof CSlugRoute
   LSlugRoute: typeof LSlugRoute
   ApiPublicRlxWebhookRoute: typeof ApiPublicRlxWebhookRoute
+  ApiPublicWebhookPaymentRoute: typeof ApiPublicWebhookPaymentRoute
   ApiPublicEmbedScriptRoute: typeof ApiPublicEmbedScriptRoute
   ApiPublicNotificationsPollRoute: typeof ApiPublicNotificationsPollRoute
 }
@@ -434,6 +447,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/webhook-payment': {
+      id: '/api/public/webhook-payment'
+      path: '/api/public/webhook-payment'
+      fullPath: '/api/public/webhook-payment'
+      preLoaderRoute: typeof ApiPublicWebhookPaymentRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/rlx-webhook': {
       id: '/api/public/rlx-webhook'
@@ -643,6 +663,7 @@ const rootRouteChildren: RootRouteChildren = {
   CSlugRoute: CSlugRoute,
   LSlugRoute: LSlugRoute,
   ApiPublicRlxWebhookRoute: ApiPublicRlxWebhookRoute,
+  ApiPublicWebhookPaymentRoute: ApiPublicWebhookPaymentRoute,
   ApiPublicEmbedScriptRoute: ApiPublicEmbedScriptRoute,
   ApiPublicNotificationsPollRoute: ApiPublicNotificationsPollRoute,
 }
