@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { getCurrencyPref, updateUserPreferences, sendTestNotification, type Currency } from "@/lib/notifications.functions";
+import { updateUserPreferences, sendTestNotification, type Currency } from "@/lib/notifications.functions";
 import { Copy, Bell, Play, Palette, Volume2 } from "lucide-react";
 
 const currencies: { value: Currency; label: string }[] = [
@@ -60,24 +60,32 @@ function NotificationsConfigPage() {
 
   async function save() {
     setSaving(true);
-    const { supabase } = await import("@/integrations/supabase/client");
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) { setSaving(false); return; }
-    const r = await updateUserPreferences({
-      notifications_enabled: enabled,
-      currency,
-      notification_position: position,
-      notification_color: highlightColor,
-      notification_sound: sound,
-      notification_duration: duration,
-    }).catch(() => null);
-    setSaving(false);
-    if (r) toast.success("Preferências salvas"); else toast.error("Erro ao salvar");
+    try {
+      const r = await updateUserPreferences({
+        notifications_enabled: enabled,
+        currency,
+        notification_position: position,
+        notification_color: highlightColor,
+        notification_sound: sound,
+        notification_duration: duration,
+      });
+      setSaving(false);
+      toast.success("Preferências salvas");
+    } catch (e) {
+      console.error("[save prefs]", e);
+      setSaving(false);
+      toast.error(e instanceof Error ? e.message : "Erro ao salvar");
+    }
   }
 
   async function testNotification() {
-    const r = await sendTestNotification().catch(() => null);
-    if (r) toast.success("Notificação de teste enviada!"); else toast.error("Erro ao testar");
+    try {
+      const r = await sendTestNotification();
+      toast.success("Notificação de teste enviada!");
+    } catch (e) {
+      console.error("[test notification]", e);
+      toast.error(e instanceof Error ? e.message : "Erro ao testar");
+    }
   }
 
   const embedCode = `<script src="https://redoxpay.vercel.app/api/public/embed-script?user_id=${userId}"></script>`;
@@ -183,7 +191,7 @@ function NotificationsConfigPage() {
           disabled={saving}
           onClick={save}
         >
-          Guardar preferências
+          {saving ? "A guardar..." : "Guardar preferências"}
         </Button>
       </Card>
 
