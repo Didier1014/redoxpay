@@ -150,7 +150,7 @@ function CheckoutPage() {
   const emolaSelected = method === "emola";
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(135deg, #f9fafc 0%, #f1f5f9 100%)" }}>
+    <div className="min-h-screen app-light" style={{ background: "linear-gradient(135deg, #f9fafc 0%, #f1f5f9 100%)" }}>
       <style>{`
         @keyframes fadeSlideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
         @keyframes urgencySpin{0%,100%{transform:rotate(0deg)}25%{transform:rotate(12deg)}75%{transform:rotate(-12deg)}}
