@@ -110,7 +110,7 @@ function CheckoutPage() {
             toast.error("Pagamento falhou");
           }
         } catch { /* retry */ }
-      }, 5000);
+      }, 3000);
     },
     onError: (e) => {
       setModal({ status: "failed", id: undefined });
@@ -159,6 +159,7 @@ function CheckoutPage() {
         @keyframes spin{to{transform:rotate(360deg)}}
         .checkout-card{animation:fadeSlideUp 0.4s ease forwards}
         .urgency-banner{animation:urgencySpin 1.5s ease-in-out infinite}
+        .spinner-red{width:40px;height:40px;border:3px solid rgba(255,51,51,0.2);border-top-color:#ff3333;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
       `}</style>
 
       {modal && (
@@ -172,27 +173,30 @@ function CheckoutPage() {
             {modal.status === "processing" ? (
               <div className="relative space-y-4">
                 <div className="mx-auto w-[56px] h-[56px] rounded-full flex items-center justify-center"
-                  style={{ background: `${methodColor}15` }}>
-                  <Loader2 className="h-7 w-7" style={{ color: methodColor, animation: "spin 0.7s linear infinite" }} />
+                  style={{ background: "rgba(255,51,51,0.12)" }}>
+                  <Loader2 className="h-7 w-7" style={{ color: "#ff3333", animation: "spin 0.7s linear infinite" }} />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900">A processar pagamento</h2>
-                <p className="text-sm text-gray-400">Aguarde enquanto processamos o seu pagamento...</p>
+                <p className="text-sm text-gray-400">Aguardando confirmação do pagamento...</p>
               </div>
             ) : modal.status === "paid" ? (
               <div className="relative space-y-4">
-                <CheckCircle2 className="h-14 w-14 text-green-500 mx-auto" />
+                <CheckCircle2 className="h-14 w-14 mx-auto" style={{ color: "#ff3333" }} />
                 <h2 className="text-xl font-bold text-gray-900">Pagamento confirmado!</h2>
                 <p className="text-sm text-gray-400">Recebemos o seu pagamento com sucesso.</p>
                 {modal.id && <p className="text-xs text-gray-300 pt-2">Ref: {modal.id}</p>}
                 {modal.delivery_url ? (
                   <a href={modal.delivery_url} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold text-white transition-all"
-                    style={{ background: "linear-gradient(135deg, #16a34a, #15803d)" }}>
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold text-white transition-all hover:brightness-110"
+                    style={{ background: "linear-gradient(135deg, #ff3333, #cc0000)" }}>
                     <ExternalLink className="h-4 w-4" />
                     Acessar Produto
                   </a>
                 ) : (
-                  <Button className="w-full mt-4 rounded-xl" onClick={() => setModal(null)}>Fechar</Button>
+                  <div className="space-y-3">
+                    <p className="text-xs text-gray-400">Produto disponível em breve, verifique seu email</p>
+                    <Button className="w-full rounded-xl" onClick={() => setModal(null)}>Fechar</Button>
+                  </div>
                 )}
               </div>
             ) : modal.status === "pending" ? (
