@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardStats, listMyTransactions } from "@/lib/transactions.functions";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Mail, Smartphone, Calendar, BarChart3, CircleDollarSign, ArrowUpRight,
 } from "lucide-react";
@@ -17,8 +18,9 @@ const fmtMT = (n: number) =>
 function Overview() {
   const fetchStats = useServerFn(getDashboardStats);
   const fetchTx = useServerFn(listMyTransactions);
-  const { data: stats } = useQuery({ queryKey: ["stats"], queryFn: () => fetchStats() });
-  const { data: txs = [] } = useQuery({ queryKey: ["tx"], queryFn: () => fetchTx() });
+  const { data: stats, isLoading: statsLoading } = useQuery({ queryKey: ["stats"], queryFn: () => fetchStats() });
+  const { data: txs = [], isLoading: txsLoading } = useQuery({ queryKey: ["tx"], queryFn: () => fetchTx() });
+  const loading = statsLoading || txsLoading;
 
   const paid = txs.filter((t) => t.status === "paid");
   const mpesaSum = paid.filter((t) => t.method === "mpesa").reduce((s, t) => s + Number(t.amount_mzn), 0);
@@ -32,6 +34,8 @@ function Overview() {
 
   const greet = greeting();
   const name = stats?.profile?.full_name || stats?.profile?.business_name || "bem-vindo";
+
+  if (loading) return <LoadingSkeleton />;
 
   return (
     <div className="space-y-4">
@@ -251,6 +255,21 @@ function LineChart({ data }: { data: { label: string; v: number }[] }) {
         <text key={i} x={P + (i/(xLabels.length-1)) * (W - P*2)} y={H-8} fontSize="9" fill="#94a3b8" textAnchor="middle">{l}</text>
       ))}
     </svg>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[0.1, 0.2, 0.3, 0.4, 0.5].map((d, i) => (
+        <Card key={i} className="rounded-2xl shadow-sm p-5" style={{ animation: `fadeSlideUp 0.4s ease ${d}s both` }}>
+          <Skeleton className="h-4 w-24 mb-3" />
+          <Skeleton className="h-8 w-36 mb-2" />
+          <Skeleton className="h-3 w-48" />
+        </Card>
+      ))}
+      <style>{`@keyframes fadeSlideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}`}</style>
+    </div>
   );
 }
 

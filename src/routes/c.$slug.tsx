@@ -56,6 +56,7 @@ function CheckoutPage() {
   const [modal, setModal] = useState<{ status: "processing" | "paid" | "failed" | "pending"; id?: string; delivery_url?: string } | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollCountRef = useRef(0);
+  const checkingRef = useRef(false);
 
   useEffect(() => {
     if (cardRef.current) {
@@ -85,36 +86,64 @@ function CheckoutPage() {
     onSuccess: (r) => {
       setModal({ status: "pending", id: r.id, delivery_url: undefined });
       toast("Pagamento enviado — confirme no seu telefone");
-
-      // Start polling
-      pollCountRef.current = 0;
-      if (pollRef.current) clearInterval(pollRef.current);
-      pollRef.current = setInterval(async () => {
-        pollCountRef.current++;
-        if (pollCountRef.current > 60) {
-          if (pollRef.current) clearInterval(pollRef.current);
-          toast.info("O pagamento ainda está a ser processado. Receberá uma notificação quando for confirmado.");
-          return;
-        }
-        try {
-          const result = await pollStatus.mutateAsync(r.id);
-          if (result.status === "paid") {
-            if (pollRef.current) clearInterval(pollRef.current);
-            toast.success("Pagamento confirmado!");
-            window.location.href = `/obrigado?tx_id=${r.id}&slug=${slug}`;
-          } else if (result.status === "failed") {
-            if (pollRef.current) clearInterval(pollRef.current);
-            setModal({ status: "failed", id: r.id });
-            toast.error("Pagamento falhou");
-          }
-        } catch { /* retry */ }
-      }, 3000);
     },
     onError: (e) => {
       setModal({ status: "failed", id: undefined });
       toast.error(e instanceof Error ? e.message : "Erro");
     },
   });
+
+  useEffect(() => {
+    if (modal?.status !== "pending" || !modal.id) return;
+    pollCountRef.current = 0;
+    let timer: ReturnType<typeof setInterval>;
+    let stopped = false;
+
+    async function check() {
+      if (checkingRef.current || stopped) return;
+      checkingRef.current = true;
+      try {
+        const result = await checkTransactionStatus({ data: { transaction_id: modal.id! } });
+        if (stopped) return;
+        if (result.status === "paid") {
+          cleanup();
+          toast.success("Pagamento confirmado!");
+          window.location.href = `/obrigado?tx_id=${modal.id}&slug=${slug}`;
+        } else if (result.status === "failed") {
+          cleanup();
+          setModal({ status: "failed", id: modal.id });
+          toast.error("Pagamento falhou");
+        }
+      } catch { /* retry */ }
+      checkingRef.current = false;
+    }
+
+    function onVisible() {
+      if (document.visibilityState === "visible") check();
+    }
+
+    function cleanup() {
+      stopped = true;
+      clearInterval(timer);
+      window.removeEventListener("focus", check);
+      document.removeEventListener("visibilitychange", onVisible);
+    }
+
+    timer = setInterval(() => {
+      pollCountRef.current++;
+      if (pollCountRef.current > 60) {
+        cleanup();
+        toast.info("O pagamento ainda está a ser processado. Receberá uma notificação quando for confirmado.");
+        return;
+      }
+      check();
+    }, 3000);
+
+    window.addEventListener("focus", check);
+    document.addEventListener("visibilitychange", onVisible);
+
+    return cleanup;
+  }, [modal?.status, modal?.id, slug]);
 
   if (isLoading) return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6" style={{ background: "linear-gradient(135deg, #f9fafc 0%, #f1f5f9 100%)" }}>
