@@ -74,10 +74,7 @@ function NewTransactionPage() {
             return (
               <button key={opt} onClick={()=>setMethod(opt)}
                 className={`h-14 rounded-xl text-sm font-medium border transition-colors flex items-center justify-center gap-2 ${method===opt ? "bg-foreground text-background border-foreground" : "bg-card border-border text-foreground/80"}`}>
-                <svg className="w-5 h-5 shrink-0" viewBox="0 0 32 32" fill="none">
-                  <rect width="32" height="32" rx="8" fill={isM ? "#e11d48" : "#f59e0b"} />
-                  <text x="16" y="22" textAnchor="middle" fill="white" fontSize="18" fontWeight="bold" fontFamily="Arial">{isM ? "M" : "e"}</text>
-                </svg>
+                <img src={isM ? "/brands/mpesa.png" : "/brands/emola.png"} alt={isM ? "M-Pesa" : "e-Mola"} className="w-5 h-5 shrink-0" />
                 {isM ? "M-Pesa" : "e-Mola"}
               </button>
             );

@@ -287,10 +287,7 @@ function CheckoutPage() {
                       <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                     </span>
                   )}
-                  <svg className="w-5 h-5 shrink-0" viewBox="0 0 32 32" fill="none">
-                    <rect width="32" height="32" rx="8" fill="#e11d48" />
-                    <text x="16" y="22" textAnchor="middle" fill="white" fontSize="18" fontWeight="bold" fontFamily="Arial">M</text>
-                  </svg>
+                  <img src="/brands/mpesa.png" alt="M-Pesa" className="w-5 h-5 shrink-0" />
                   M-Pesa
                 </button>
                 <button onClick={() => setMethod("emola")} type="button"
@@ -303,10 +300,7 @@ function CheckoutPage() {
                       <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                     </span>
                   )}
-                  <svg className="w-5 h-5 shrink-0" viewBox="0 0 32 32" fill="none">
-                    <rect width="32" height="32" rx="8" fill="#f59e0b" />
-                    <text x="16" y="22" textAnchor="middle" fill="white" fontSize="18" fontWeight="bold" fontFamily="Arial">e</text>
-                  </svg>
+                  <img src="/brands/emola.png" alt="e-Mola" className="w-5 h-5 shrink-0" />
                   e-Mola
                 </button>
               </div>
