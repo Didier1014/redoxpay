@@ -125,7 +125,7 @@ function NewTransactionPage() {
         </Card>
       )}
 
-      <Button onClick={()=>m.mutate()} disabled={!ready || m.isPending} className="w-full h-14 rounded-xl bg-foreground text-background disabled:bg-muted disabled:text-muted-foreground">
+      <Button onClick={()=>m.mutate()} disabled={!ready || m.isPending} className="w-full h-16 rounded-xl text-base bg-foreground text-background disabled:bg-muted disabled:text-muted-foreground">
         {m.isPending ? "A enviar..." : `Pagar ${fmtMT(displayAmount)}`}
       </Button>
     </div>

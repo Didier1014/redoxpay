@@ -323,7 +323,7 @@ function CheckoutPage() {
             </div>
 
             <button onClick={() => m.mutate()} disabled={m.isPending || !form.customer_name || !form.customer_phone}
-              className="w-full py-3.5 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full py-5 rounded-xl text-base font-bold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               style={{
                 background: methodGradient,
                 boxShadow: m.isPending ? "none" : `0 8px 24px ${methodColor}33`,

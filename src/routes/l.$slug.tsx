@@ -130,8 +130,7 @@ function LinkCheckout() {
                 <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">{fmt(Number(link.amount_mzn))}</span>
               </div>
               <Button
-                className="w-full rounded-xl bg-gradient-to-r from-primary to-primary-glow text-white"
-                size="lg"
+                className="w-full h-16 rounded-xl text-base bg-gradient-to-r from-primary to-primary-glow text-white"
                 disabled={m.isPending || !form.customer_name || !form.customer_phone}
                 onClick={() => m.mutate()}>
                 {m.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Lock className="h-4 w-4 mr-2" />}
