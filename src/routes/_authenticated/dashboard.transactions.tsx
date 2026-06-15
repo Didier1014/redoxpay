@@ -40,7 +40,7 @@ function TxPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm truncate">{t.customer_name}</p>
-              <p className="text-xs text-muted-foreground">{t.customer_phone} · {new Date(t.created_at).toLocaleDateString("pt-MZ")}</p>
+              <p className="text-xs text-muted-foreground">{t.customer_phone} · {new Date(t.created_at).toLocaleString("pt-MZ", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" })}</p>
             </div>
             <div className="text-right">
               <p className="font-semibold">{fmtMT(Number(t.amount_mzn))}</p>
