@@ -45,3 +45,8 @@ lovable-project-7784eebc.zip
 *.sln
 *.sw?
 .vercel
+
+supabase/.temp/
+
+# Supabase
+.supabase/
