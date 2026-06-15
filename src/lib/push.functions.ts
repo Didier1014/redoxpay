@@ -31,7 +31,6 @@ export const unsubscribePush = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: user } = await supabaseAdmin.auth.admin.getUserById(context.userId);
     const meta = user?.user?.user_metadata ?? {};
-    const { [Symbol("push_subscription")]: _, ...rest } = meta;
     const cleaned = Object.fromEntries(
       Object.entries(meta).filter(([k]) => k !== "push_subscription")
     );
