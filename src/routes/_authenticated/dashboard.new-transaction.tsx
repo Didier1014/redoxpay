@@ -73,8 +73,8 @@ function NewTransactionPage() {
             const isM = opt === "mpesa";
             return (
               <button key={opt} onClick={()=>setMethod(opt)}
-                className={`h-14 rounded-xl text-sm font-medium border transition-colors flex items-center justify-center gap-2 ${method===opt ? "bg-foreground text-background border-foreground" : "bg-card border-border text-foreground/80"}`}>
-                <img src={isM ? "/brands/mpesa.png" : "/brands/emola.png"} alt={isM ? "M-Pesa" : "e-Mola"} className="w-5 h-5 shrink-0" />
+                className={`h-20 rounded-xl text-base font-medium border transition-colors flex items-center justify-center gap-3 ${method===opt ? "bg-foreground text-background border-foreground" : "bg-card border-border text-foreground/80"}`}>
+                <img src={isM ? "/brands/mpesa.png" : "/brands/emola.png"} alt={isM ? "M-Pesa" : "e-Mola"} className="w-8 h-8 shrink-0" />
                 {isM ? "M-Pesa" : "e-Mola"}
               </button>
             );

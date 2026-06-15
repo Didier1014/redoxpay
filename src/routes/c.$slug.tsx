@@ -240,7 +240,7 @@ function CheckoutPage() {
           <div className="p-4 space-y-3">
             {product.cover_url && (
               <div className="flex items-center gap-3 pb-2">
-                <img src={product.cover_url} alt={product.name} className="h-14 w-14 rounded-xl object-cover border border-gray-100" />
+                <img src={product.cover_url} alt={product.name} className="h-20 w-20 rounded-xl object-cover border border-gray-100" />
                 <div className="min-w-0 flex-1">
                   <h1 className="text-base font-extrabold tracking-tight leading-tight text-gray-900 truncate">{product.name}</h1>
                   {product.description && <p className="text-xs text-gray-400 truncate">{product.description}</p>}
@@ -278,7 +278,7 @@ function CheckoutPage() {
               <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">Deseja pagar com:</p>
               <div className="grid grid-cols-2 gap-2">
                 <button onClick={() => setMethod("mpesa")} type="button"
-                  className="relative py-3 px-2 rounded-xl border-[1.5px] font-semibold text-sm transition-all flex items-center justify-center gap-1.5"
+                  className="relative py-4 px-3 rounded-xl border-[1.5px] font-semibold text-base transition-all flex items-center justify-center gap-2"
                   style={mpesaSelected
                     ? { borderColor: "#ef4444", background: "#fef2f2", color: "#dc2626", boxShadow: "0 0 0 3px rgba(220,38,38,0.08)" }
                     : { borderColor: "rgba(148,163,184,0.3)", background: "#fff", color: "#9ca3af" }}>
@@ -287,11 +287,11 @@ function CheckoutPage() {
                       <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                     </span>
                   )}
-                  <img src="/brands/mpesa.png" alt="M-Pesa" className="w-5 h-5 shrink-0" />
+                  <img src="/brands/mpesa.png" alt="M-Pesa" className="w-8 h-8 shrink-0" />
                   M-Pesa
                 </button>
                 <button onClick={() => setMethod("emola")} type="button"
-                  className="relative py-3 px-2 rounded-xl border-[1.5px] font-semibold text-sm transition-all flex items-center justify-center gap-1.5"
+                  className="relative py-4 px-3 rounded-xl border-[1.5px] font-semibold text-base transition-all flex items-center justify-center gap-2"
                   style={emolaSelected
                     ? { borderColor: "#FF6600", background: "#fff7ed", color: "#e65500", boxShadow: "0 0 0 3px rgba(255,102,0,0.08)" }
                     : { borderColor: "rgba(148,163,184,0.3)", background: "#fff", color: "#9ca3af" }}>
@@ -300,7 +300,7 @@ function CheckoutPage() {
                       <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                     </span>
                   )}
-                  <img src="/brands/emola.png" alt="e-Mola" className="w-5 h-5 shrink-0" />
+                  <img src="/brands/emola.png" alt="e-Mola" className="w-8 h-8 shrink-0" />
                   e-Mola
                 </button>
               </div>

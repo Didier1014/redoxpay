@@ -149,10 +149,10 @@ function MethodBtn({ active, onClick, label }: { active: boolean; onClick: () =>
   const isMpesa = label === "M-Pesa";
   return (
     <button onClick={onClick} type="button"
-      className={`flex items-center justify-center gap-2 rounded-xl border p-4 text-sm font-medium transition-colors ${
+      className={`flex items-center justify-center gap-3 rounded-xl border p-5 text-base font-medium transition-colors ${
         active ? "border-primary bg-primary/10 text-primary" : "border-white/10 bg-white/5 hover:bg-white/10"
       }`}>
-      <img src={isMpesa ? "/brands/mpesa.png" : "/brands/emola.png"} alt={label} className="w-5 h-5 shrink-0" />
+      <img src={isMpesa ? "/brands/mpesa.png" : "/brands/emola.png"} alt={label} className="w-8 h-8 shrink-0" />
       {label}
     </button>
   );

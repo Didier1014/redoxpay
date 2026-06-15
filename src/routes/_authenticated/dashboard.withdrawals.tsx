@@ -53,8 +53,8 @@ function WdPage() {
           <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">Método</Label>
           <div className="grid grid-cols-3 gap-2">
             {(["mpesa","emola","bank"] as const).map(o => (
-              <button key={o} onClick={()=>setMethod(o)} className={`h-11 rounded-xl text-sm font-medium border flex items-center justify-center gap-1.5 ${method===o ? "bg-foreground text-background border-foreground" : "bg-card border-border"}`}>
-                {o !== "bank" && <img src={o === "mpesa" ? "/brands/mpesa.png" : "/brands/emola.png"} alt={o === "mpesa" ? "M-Pesa" : "e-Mola"} className="w-4 h-4 shrink-0" />}
+              <button key={o} onClick={()=>setMethod(o)} className={`h-16 rounded-xl text-base font-medium border flex items-center justify-center gap-2 ${method===o ? "bg-foreground text-background border-foreground" : "bg-card border-border"}`}>
+                {o !== "bank" && <img src={o === "mpesa" ? "/brands/mpesa.png" : "/brands/emola.png"} alt={o === "mpesa" ? "M-Pesa" : "e-Mola"} className="w-7 h-7 shrink-0" />}
                 {o === "mpesa" ? "M-Pesa" : o === "emola" ? "e-Mola" : "Banco"}
               </button>
             ))}
