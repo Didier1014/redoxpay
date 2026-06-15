@@ -136,13 +136,8 @@ export const checkTransactionStatus = createServerFn({ method: "POST" })
 
       if (next !== tx.status) {
         await supabaseAdmin.from("transactions").update({ status: next }).eq("id", tx.id);
-        if (next === "paid") {
-          const { data: prof } = await supabaseAdmin
-            .from("profiles").select("balance_mzn").eq("id", tx.user_id).maybeSingle();
-          await supabaseAdmin.from("profiles")
-            .update({ balance_mzn: Number(prof?.balance_mzn ?? 0) + Number(tx.net_mzn) })
-            .eq("id", tx.user_id);
-        }
+        // Balance is credited in the webhook only (which has RLX fee info).
+        // This function is a fallback for polling; webhook handles the real update.
       }
       if (next === "paid" || tx.status === "paid") {
         const { data: prod } = await supabaseAdmin
