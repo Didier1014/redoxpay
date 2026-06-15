@@ -54,41 +54,43 @@ function AuthedShell() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
+    <div className="min-h-screen text-foreground relative overflow-x-hidden">
       <ShaderBackground />
       {/* Ambient glow */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute -top-40 -left-32 h-[420px] w-[420px] rounded-full bg-primary/20 blur-[140px]" />
         <div className="absolute top-1/3 -right-32 h-[380px] w-[380px] rounded-full bg-primary-glow/15 blur-[140px]" />
         <div className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:40px_40px]" />
       </div>
 
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/60 border-b border-white/5">
-        <div className="max-w-3xl mx-auto flex items-center gap-2 px-4 h-14">
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-xl h-10 w-10 bg-white/5 border-white/10 hover:bg-white/10 text-foreground">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="bg-sidebar text-sidebar-foreground w-80 p-0 border-r border-white/5 [&>button]:hidden">
-              <DrawerContent close={() => setOpen(false)} onSignOut={signOut} />
-            </SheetContent>
-          </Sheet>
-          <Link to="/dashboard" className="font-bold tracking-tight ml-2 flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-primary-glow shadow-[0_0_12px_var(--primary-glow)]" />
-            REDOX <span className="text-gradient-red">PAY</span>
-          </Link>
-          <div className="ml-auto">
-            <NotificationBell />
+      <div className="relative z-10 bg-background min-h-screen">
+        <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/60 border-b border-white/5">
+          <div className="max-w-3xl mx-auto flex items-center gap-2 px-4 h-14">
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="rounded-xl h-10 w-10 bg-white/5 border-white/10 hover:bg-white/10 text-foreground">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="bg-sidebar text-sidebar-foreground w-80 p-0 border-r border-white/5 [&>button]:hidden">
+                <DrawerContent close={() => setOpen(false)} onSignOut={signOut} />
+              </SheetContent>
+            </Sheet>
+            <Link to="/dashboard" className="font-bold tracking-tight ml-2 flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-primary-glow shadow-[0_0_12px_var(--primary-glow)]" />
+              REDOX <span className="text-gradient-red">PAY</span>
+            </Link>
+            <div className="ml-auto">
+              <NotificationBell />
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-5 pb-24">
-        <Outlet />
-      </main>
-      <FloatingSaleNotification />
+        <main className="max-w-3xl mx-auto px-4 py-5 pb-24">
+          <Outlet />
+        </main>
+        <FloatingSaleNotification />
+      </div>
     </div>
   );
 }

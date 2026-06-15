@@ -23,24 +23,26 @@ const WHATSAPP = "https://wa.me/258840000000";
 
 function Landing() {
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <div className="min-h-screen text-foreground overflow-x-hidden">
       <ShaderBackground />
       {/* Ambient glow */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute -top-40 left-1/4 h-[520px] w-[520px] rounded-full bg-primary/25 blur-[160px]" />
         <div className="absolute top-1/2 -right-32 h-[420px] w-[420px] rounded-full bg-primary-glow/20 blur-[140px]" />
         <div className="absolute inset-0 opacity-[0.04] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:48px_48px]" />
       </div>
 
-      <Nav />
-      <Hero />
-      <PaymentFlow />
-      <Features />
-      <Security />
-      <DashboardPreview />
-      <Testimonials />
-      <FinalCTA />
-      <Footer />
+      <div className="relative z-10 bg-background min-h-screen">
+        <Nav />
+        <Hero />
+        <PaymentFlow />
+        <Features />
+        <Security />
+        <DashboardPreview />
+        <Testimonials />
+        <FinalCTA />
+        <Footer />
+      </div>
     </div>
   );
 }
