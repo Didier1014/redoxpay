@@ -100,10 +100,16 @@ function CheckoutPage() {
           const result = await pollStatus.mutateAsync(r.id);
           if (result.status === "paid") {
             if (pollRef.current) clearInterval(pollRef.current);
+            toast.success("Pagamento confirmado!");
             // Fetch product to get delivery_url
             const prodRes = await fetchProduct({ data: { slug } });
-            setModal({ status: "paid", id: r.id, delivery_url: prodRes?.delivery_url ?? undefined });
-            toast.success("Pagamento confirmado!");
+            const url = prodRes?.delivery_url;
+            if (url) {
+              // Auto-redirect to the deliverable
+              window.location.href = url;
+            } else {
+              setModal({ status: "paid", id: r.id, delivery_url: undefined });
+            }
           } else if (result.status === "failed") {
             if (pollRef.current) clearInterval(pollRef.current);
             setModal({ status: "failed", id: r.id });
@@ -185,19 +191,10 @@ function CheckoutPage() {
                 <h2 className="text-xl font-bold text-gray-900">Pagamento confirmado!</h2>
                 <p className="text-sm text-gray-400">Recebemos o seu pagamento com sucesso.</p>
                 {modal.id && <p className="text-xs text-gray-300 pt-2">Ref: {modal.id}</p>}
-                {modal.delivery_url ? (
-                  <a href={modal.delivery_url} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold text-white transition-all hover:brightness-110"
-                    style={{ background: "linear-gradient(135deg, #ff3333, #cc0000)" }}>
-                    <ExternalLink className="h-4 w-4" />
-                    Acessar Produto
-                  </a>
-                ) : (
-                  <div className="space-y-3">
-                    <p className="text-xs text-gray-400">Produto disponível em breve, verifique seu email</p>
-                    <Button className="w-full rounded-xl" onClick={() => setModal(null)}>Fechar</Button>
-                  </div>
-                )}
+                <div className="space-y-3">
+                  <p className="text-xs text-gray-400">Produto disponível em breve, verifique seu email</p>
+                  <Button className="w-full rounded-xl" onClick={() => setModal(null)}>Fechar</Button>
+                </div>
               </div>
             ) : modal.status === "pending" ? (
               <div className="relative space-y-4">
