@@ -26,6 +26,7 @@ import { Route as AuthenticatedDashboardReportsRouteImport } from './routes/_aut
 import { Route as AuthenticatedDashboardProfileRouteImport } from './routes/_authenticated/dashboard.profile'
 import { Route as AuthenticatedDashboardProductsRouteImport } from './routes/_authenticated/dashboard.products'
 import { Route as AuthenticatedDashboardPaymentLinksRouteImport } from './routes/_authenticated/dashboard.payment-links'
+import { Route as AuthenticatedDashboardNotificationsRouteImport } from './routes/_authenticated/dashboard.notifications'
 import { Route as AuthenticatedDashboardNewTransactionRouteImport } from './routes/_authenticated/dashboard.new-transaction'
 import { Route as AuthenticatedDashboardIntegrationsRouteImport } from './routes/_authenticated/dashboard.integrations'
 import { Route as AuthenticatedDashboardCustomersRouteImport } from './routes/_authenticated/dashboard.customers'
@@ -126,6 +127,12 @@ const AuthenticatedDashboardPaymentLinksRoute =
     path: '/dashboard/payment-links',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardNotificationsRoute =
+  AuthenticatedDashboardNotificationsRouteImport.update({
+    id: '/dashboard/notifications',
+    path: '/dashboard/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardNewTransactionRoute =
   AuthenticatedDashboardNewTransactionRouteImport.update({
     id: '/dashboard/new-transaction',
@@ -168,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/customers': typeof AuthenticatedDashboardCustomersRoute
   '/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
   '/dashboard/new-transaction': typeof AuthenticatedDashboardNewTransactionRoute
+  '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRoute
   '/dashboard/payment-links': typeof AuthenticatedDashboardPaymentLinksRoute
   '/dashboard/products': typeof AuthenticatedDashboardProductsRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
@@ -191,6 +199,7 @@ export interface FileRoutesByTo {
   '/dashboard/customers': typeof AuthenticatedDashboardCustomersRoute
   '/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
   '/dashboard/new-transaction': typeof AuthenticatedDashboardNewTransactionRoute
+  '/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRoute
   '/dashboard/payment-links': typeof AuthenticatedDashboardPaymentLinksRoute
   '/dashboard/products': typeof AuthenticatedDashboardProductsRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
@@ -216,6 +225,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/customers': typeof AuthenticatedDashboardCustomersRoute
   '/_authenticated/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
   '/_authenticated/dashboard/new-transaction': typeof AuthenticatedDashboardNewTransactionRoute
+  '/_authenticated/dashboard/notifications': typeof AuthenticatedDashboardNotificationsRoute
   '/_authenticated/dashboard/payment-links': typeof AuthenticatedDashboardPaymentLinksRoute
   '/_authenticated/dashboard/products': typeof AuthenticatedDashboardProductsRoute
   '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
@@ -241,6 +251,7 @@ export interface FileRouteTypes {
     | '/dashboard/customers'
     | '/dashboard/integrations'
     | '/dashboard/new-transaction'
+    | '/dashboard/notifications'
     | '/dashboard/payment-links'
     | '/dashboard/products'
     | '/dashboard/profile'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/dashboard/customers'
     | '/dashboard/integrations'
     | '/dashboard/new-transaction'
+    | '/dashboard/notifications'
     | '/dashboard/payment-links'
     | '/dashboard/products'
     | '/dashboard/profile'
@@ -288,6 +300,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/customers'
     | '/_authenticated/dashboard/integrations'
     | '/_authenticated/dashboard/new-transaction'
+    | '/_authenticated/dashboard/notifications'
     | '/_authenticated/dashboard/payment-links'
     | '/_authenticated/dashboard/products'
     | '/_authenticated/dashboard/profile'
@@ -432,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardPaymentLinksRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard/notifications': {
+      id: '/_authenticated/dashboard/notifications'
+      path: '/dashboard/notifications'
+      fullPath: '/dashboard/notifications'
+      preLoaderRoute: typeof AuthenticatedDashboardNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard/new-transaction': {
       id: '/_authenticated/dashboard/new-transaction'
       path: '/dashboard/new-transaction'
@@ -476,6 +496,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardCustomersRoute: typeof AuthenticatedDashboardCustomersRoute
   AuthenticatedDashboardIntegrationsRoute: typeof AuthenticatedDashboardIntegrationsRoute
   AuthenticatedDashboardNewTransactionRoute: typeof AuthenticatedDashboardNewTransactionRoute
+  AuthenticatedDashboardNotificationsRoute: typeof AuthenticatedDashboardNotificationsRoute
   AuthenticatedDashboardPaymentLinksRoute: typeof AuthenticatedDashboardPaymentLinksRoute
   AuthenticatedDashboardProductsRoute: typeof AuthenticatedDashboardProductsRoute
   AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
@@ -496,6 +517,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedDashboardIntegrationsRoute,
   AuthenticatedDashboardNewTransactionRoute:
     AuthenticatedDashboardNewTransactionRoute,
+  AuthenticatedDashboardNotificationsRoute:
+    AuthenticatedDashboardNotificationsRoute,
   AuthenticatedDashboardPaymentLinksRoute:
     AuthenticatedDashboardPaymentLinksRoute,
   AuthenticatedDashboardProductsRoute: AuthenticatedDashboardProductsRoute,

@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, Package, Receipt, Wallet, LogOut, Menu, X,
   PlusCircle, BarChart3, Plug, BookOpen, Settings as SettingsIcon, Moon,
-  Users, Link2, Code2, MessageSquare, RotateCcw, User, Shield,
+  Users, Link2, Code2, MessageSquare, RotateCcw, User, Shield, Bell,
 } from "lucide-react";
+import { NotificationBell } from "@/components/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
@@ -29,6 +30,7 @@ const navItems = [
   { to: "/dashboard/products", label: "Produtos", icon: Package, exact: false },
   { to: "/dashboard/payment-links", label: "Links de pagamento", icon: Link2, exact: false },
 
+  { to: "/dashboard/notifications", label: "Notificações", icon: Bell, exact: false },
   { to: "/dashboard/subscriptions", label: "Recorrência", icon: RotateCcw, exact: false },
   { to: "/dashboard/sms", label: "SMS", icon: MessageSquare, exact: false },
   { to: "/dashboard/withdrawals", label: "Saques", icon: Wallet, exact: false },
@@ -74,6 +76,9 @@ function AuthedShell() {
             <span className="h-2 w-2 rounded-full bg-primary-glow shadow-[0_0_12px_var(--primary-glow)]" />
             REDOX <span className="text-gradient-red">PAY</span>
           </Link>
+          <div className="ml-auto">
+            <NotificationBell />
+          </div>
         </div>
       </header>
 

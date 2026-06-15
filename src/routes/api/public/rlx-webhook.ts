@@ -98,7 +98,7 @@ export const Route = createFileRoute("/api/public/rlx-webhook")({
               user_id: tx.user_id,
               type: "sale",
               title: "Nova venda",
-              body: `Pagamento de ${Number(tx.amount_mzn).toLocaleString("pt-MZ", { style: "currency", currency: "MZN" })} recebido`,
+              message: `Pagamento de ${Number(tx.amount_mzn).toLocaleString("pt-MZ", { style: "currency", currency: "MZN" })} recebido`,
               data: { transaction_id: tx.id },
             }).catch(() => {});
           }
