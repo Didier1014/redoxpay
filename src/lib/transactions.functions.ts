@@ -37,11 +37,13 @@ const checkoutSchema = z.object({
   method: z.enum(["mpesa", "emola", "card"]),
 });
 
-// Taxa do comerciante: 15% + 15 MT por transação
+// Seller pays 15% + 15 MT; RLX costs 12% + 12 MT; admin profit = difference.
 function calcFee(amount: number) {
-  const fee = Math.round((amount * 0.15 + 15) * 100) / 100;
-  const net = Math.round((amount - fee) * 100) / 100;
-  return { fee, net };
+  const seller_fee = Math.round((amount * 0.15 + 15) * 100) / 100;
+  const rlx_cost = Math.round((amount * 0.12 + 12) * 100) / 100;
+  const admin_margin = Math.round((seller_fee - rlx_cost) * 100) / 100;
+  const seller_net = Math.round((amount - seller_fee) * 100) / 100;
+  return { seller_fee, rlx_cost, admin_margin, seller_net };
 }
 
 // Normalize phone to local 9-digit format expected by RLX (e.g. 84xxxxxxx).
@@ -65,7 +67,7 @@ export const createCheckout = createServerFn({ method: "POST" })
 
     const amount = data.amount_mzn ?? Number(product.price_mzn);
     if (amount < 60) throw new Error("Valor mínimo é 60 MT");
-    const { fee, net } = calcFee(amount);
+    const { seller_fee, seller_net } = calcFee(amount);
 
     // Insert transaction FIRST with pending status
     const { data: tx, error: tErr } = await supabaseAdmin.from("transactions").insert({
@@ -76,8 +78,8 @@ export const createCheckout = createServerFn({ method: "POST" })
       customer_phone: data.customer_phone,
       method: data.method,
       amount_mzn: amount,
-      fee_mzn: fee,
-      net_mzn: net,
+      fee_mzn: seller_fee,
+      net_mzn: seller_net,
       status: "pending",
       external_ref: null,
     }).select().single();
@@ -97,10 +99,10 @@ export const createCheckout = createServerFn({ method: "POST" })
     } else if (!token) {
       await supabaseAdmin.from("transactions").update({ status: "paid", external_ref: `SIM-${Date.now()}` }).eq("id", tx.id);
       const { data: prof } = await supabaseAdmin.from("profiles").select("balance_mzn").eq("id", product.user_id).maybeSingle();
-      await supabaseAdmin.from("profiles").update({ balance_mzn: Number(prof?.balance_mzn ?? 0) + net }).eq("id", product.user_id);
+      await supabaseAdmin.from("profiles").update({ balance_mzn: Number(prof?.balance_mzn ?? 0) + seller_net }).eq("id", product.user_id);
     }
 
-    return { id: tx.id, status: "pending", amount, fee, net, message: null };
+    return { id: tx.id, status: "pending", amount, fee: seller_fee, net: seller_net, message: null };
   });
 
 // Polling endpoint — checks RLX for an updated transaction status.

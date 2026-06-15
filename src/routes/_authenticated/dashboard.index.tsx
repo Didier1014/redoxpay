@@ -14,6 +14,8 @@ export const Route = createFileRoute("/_authenticated/dashboard/")({
 
 const fmtMT = (n: number) =>
   new Intl.NumberFormat("pt-MZ", { maximumFractionDigits: 0 }).format(n);
+const fmtMT2 = (n: number) =>
+  new Intl.NumberFormat("pt-MZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
 function Overview() {
   const fetchStats = useServerFn(getDashboardStats);
@@ -131,7 +133,11 @@ function Overview() {
               </tr>
             </thead>
             <tbody>
-              {txs.slice(0, 6).map((t) => (
+              {txs.slice(0, 6).map((t) => {
+                const amt = Number(t.amount_mzn);
+                const tFee = Math.round((amt * 0.15 + 15) * 100) / 100;
+                const tNet = Math.round((amt - tFee) * 100) / 100;
+                return (
                 <tr key={t.id} className="border-b border-border/60 last:border-0">
                   <td className="py-3 pr-2">
                     <div className="font-medium truncate max-w-[100px]">{t.customer_name}</div>
@@ -142,14 +148,21 @@ function Overview() {
                       {t.method === 'mpesa' ? 'M-PESA' : t.method === 'emola' ? 'E-MOLA' : 'CARTÃO'}
                     </span>
                   </td>
-                  <td className="py-3 pr-2 whitespace-nowrap">{fmtMT(Number(t.amount_mzn))} <span className="text-muted-foreground text-xs">MT</span></td>
+                  <td className="py-3 pr-2 whitespace-nowrap">
+                    <span>{fmtMT(amt)} MT</span>
+                    {t.status === 'paid' && (
+                      <div className="text-[11px] text-muted-foreground leading-tight">
+                        Taxa: -{fmtMT2(tFee)} MT · <span className="text-emerald-600 font-medium">+{fmtMT2(tNet)} MT</span>
+                      </div>
+                    )}
+                  </td>
                   <td className="py-3 text-right">
                     {t.status === 'paid' && <span className="inline-flex items-center gap-1 text-xs text-emerald-600"><Dot color="#10b981" />Sucesso</span>}
                     {t.status === 'failed' && <span className="inline-flex items-center gap-1 text-xs text-[#e11d48]"><Dot color="#e11d48" />Falhou</span>}
                     {t.status === 'pending' && <span className="inline-flex items-center gap-1 text-xs text-amber-600"><Dot color="#f59e0b" />Pendente</span>}
                   </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         )}

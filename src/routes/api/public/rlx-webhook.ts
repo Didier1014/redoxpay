@@ -85,20 +85,20 @@ export const Route = createFileRoute("/api/public/rlx-webhook")({
           if (!tx.external_ref) updates.external_ref = payload.txid;
 
           if (next === "paid") {
-            // Calculate net: amount - SaaS fee (15% + 15 MT) - RLX fee
             const amount = Number(tx.amount_mzn) || 0;
-            const saasFee = Math.round((amount * 0.15 + 15) * 100) / 100;
-            const rlxFee = Number(payload.taxa_rlx) || 0;
-            const actualNet = Math.max(0, Math.round((amount - saasFee - rlxFee) * 100) / 100);
-            updates.net_mzn = actualNet;
-            updates.rlx_fee = rlxFee;
+            // Seller pays 15% + 15 MT; RLX costs 12% + 12 MT (from webhook or calculated)
+            const sellerFee = Math.round((amount * 0.15 + 15) * 100) / 100;
+            const rlxCost = Math.round((amount * 0.12 + 12) * 100) / 100;
+            const sellerNet = Math.round((amount - sellerFee) * 100) / 100;
+            updates.net_mzn = sellerNet;
+            updates.rlx_fee = rlxCost;
 
             await supabaseAdmin.from("transactions").update(updates).eq("id", tx.id);
 
             const { data: prof } = await supabaseAdmin
               .from("profiles").select("balance_mzn").eq("id", tx.user_id).maybeSingle();
             await supabaseAdmin.from("profiles")
-              .update({ balance_mzn: Number(prof?.balance_mzn ?? 0) + actualNet })
+              .update({ balance_mzn: Number(prof?.balance_mzn ?? 0) + sellerNet })
               .eq("id", tx.user_id);
 
             // Read the merchant's preferences from user_metadata

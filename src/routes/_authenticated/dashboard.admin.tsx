@@ -19,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/admin")({ compon
 
 const fmt = (n: number) => new Intl.NumberFormat("pt-MZ", { maximumFractionDigits: 0 }).format(n);
 const fmtMT = (n: number) => `${fmt(n)} MT`;
+const fmt2 = (n: number) => new Intl.NumberFormat("pt-MZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
 type Tab = "overview" | "users" | "transactions" | "withdrawals" | "products";
 
@@ -176,7 +177,12 @@ function AdminPage() {
 
       {tab === "transactions" && (
         <Card className="rounded-2xl shadow-sm divide-y divide-border">
-          {(txs.data ?? []).map((t: any) => (
+          {(txs.data ?? []).map((t: any) => {
+            const amt = Number(t.amount_mzn);
+            const sFee = Math.round((amt * 0.15 + 15) * 100) / 100;
+            const rCost = Math.round((amt * 0.12 + 12) * 100) / 100;
+            const margin = sFee - rCost;
+            return (
             <div key={t.id} className="p-4 flex items-center gap-3">
               <div className={`h-10 w-10 rounded-xl flex items-center justify-center text-xs font-bold ${t.method === 'mpesa' ? 'bg-rose-50 text-[#e11d48]' : t.method === 'emola' ? 'bg-amber-50 text-[#f59e0b]' : 'bg-secondary'}`}>
                 {t.method === 'mpesa' ? 'MP' : t.method === 'emola' ? 'EM' : 'CC'}
@@ -184,15 +190,23 @@ function AdminPage() {
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm truncate">{t.customer_name || "—"}</p>
                 <p className="text-xs text-muted-foreground">{t.customer_phone} · {new Date(t.created_at).toLocaleDateString("pt-MZ")}</p>
+                {t.status === 'paid' && (
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    <span className="text-rose-500">Tx vendedor: -{fmt2(sFee)}</span> ·
+                    <span className="text-amber-500"> Custo RLX: -{fmt2(rCost)}</span>
+                  </p>
+                )}
               </div>
               <div className="text-right">
-                <p className="font-semibold">{fmtMT(Number(t.amount_mzn))}</p>
-                {t.status === 'paid' && <p className="text-xs text-emerald-600">● Sucesso</p>}
+                <p className="font-semibold">{fmtMT(amt)}</p>
+                {t.status === 'paid' && (
+                  <p className="text-xs text-emerald-600">● Sucesso · margem: +{fmt2(margin)}</p>
+                )}
                 {t.status === 'failed' && <p className="text-xs text-[#e11d48]">● Falhou</p>}
                 {t.status === 'pending' && <p className="text-xs text-amber-600">● Pendente</p>}
               </div>
             </div>
-          ))}
+          )})}
           {!txs.data?.length && <p className="p-8 text-center text-sm text-muted-foreground">Nenhuma transação.</p>}
         </Card>
       )}

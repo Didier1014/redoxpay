@@ -30,7 +30,7 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       supabaseAdmin.from("products").select("*", { count: "exact", head: true }),
       supabaseAdmin.from("withdrawals").select("*", { count: "exact", head: true }),
       supabaseAdmin.from("transactions").select("amount_mzn").eq("status", "paid"),
-      supabaseAdmin.from("transactions").select("fee_mzn").eq("status", "paid"),
+      supabaseAdmin.from("transactions").select("amount_mzn,fee_mzn").eq("status", "paid"),
       supabaseAdmin.from("profiles").select("balance_mzn"),
       supabaseAdmin.from("withdrawals").select("amount_mzn").eq("status", "pending"),
       supabaseAdmin.from("withdrawals").select("amount_mzn"),
@@ -39,7 +39,13 @@ export const getAdminOverview = createServerFn({ method: "GET" })
     ]);
 
     const totalVolume = (vol ?? []).reduce((a: number, r: any) => a + Number(r.amount_mzn || 0), 0);
-    const totalProfit = (fees ?? []).reduce((a: number, r: any) => a + Number(r.fee_mzn || 0), 0);
+    // Profit = seller_fee (15%+15) - rlx_cost (12%+12) = 3% + 3 MT per transaction
+    const totalProfit = (fees ?? []).reduce((a: number, r: any) => {
+      const amt = Number(r.amount_mzn || 0);
+      const sellerFee = Math.round((amt * 0.15 + 15) * 100) / 100;
+      const rlxCost = Math.round((amt * 0.12 + 12) * 100) / 100;
+      return a + (sellerFee - rlxCost);
+    }, 0);
     const totalBalance = (balances ?? []).reduce((a: number, r: any) => a + Number(r.balance_mzn || 0), 0);
     const pendingWd = (wdPending ?? []).reduce((a: number, r: any) => a + Number(r.amount_mzn || 0), 0);
     const totalWd = (wdTotal ?? []).reduce((a: number, r: any) => a + Number(r.amount_mzn || 0), 0);
@@ -57,7 +63,10 @@ export const getAdminOverview = createServerFn({ method: "GET" })
     (txDates ?? []).forEach((t: any) => {
       const day = new Date(t.created_at).toISOString().slice(0, 10);
       if (t.status === "paid") {
-        revenueGrowth[day] = (revenueGrowth[day] || 0) + Number(t.fee_mzn || 0);
+        const amt = Number(t.amount_mzn || 0);
+        const sellerFee = Math.round((amt * 0.15 + 15) * 100) / 100;
+        const rlxCost = Math.round((amt * 0.12 + 12) * 100) / 100;
+        revenueGrowth[day] = (revenueGrowth[day] || 0) + (sellerFee - rlxCost);
       }
       txTimeline[day] = (txTimeline[day] || 0) + 1;
     });

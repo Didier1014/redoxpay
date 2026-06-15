@@ -3,9 +3,11 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 function calcFee(amount: number) {
-  const fee = Math.round((amount * 0.15 + 15) * 100) / 100;
-  const net = Math.round((amount - fee) * 100) / 100;
-  return { fee, net };
+  const seller_fee = Math.round((amount * 0.15 + 15) * 100) / 100;
+  const rlx_cost = Math.round((amount * 0.12 + 12) * 100) / 100;
+  const admin_margin = Math.round((seller_fee - rlx_cost) * 100) / 100;
+  const seller_net = Math.round((amount - seller_fee) * 100) / 100;
+  return { seller_fee, rlx_cost, admin_margin, seller_net };
 }
 function normalizePhone(phone: string) {
   const d = phone.replace(/\D/g, "");
@@ -41,13 +43,13 @@ export const payLink = createServerFn({ method: "POST" })
       .select("id,user_id,amount_mzn,active,payments_count").eq("id", data.link_id).maybeSingle();
     if (!link || !link.active) throw new Error("Link indisponível");
     const amount = Number(link.amount_mzn);
-    const { fee, net } = calcFee(amount);
+    const { seller_fee, seller_net } = calcFee(amount);
 
     const token = process.env.RLX_API_TOKEN;
     // Insert transaction FIRST with pending status
     const { data: tx, error } = await supabaseAdmin.from("transactions").insert({
       user_id: link.user_id, customer_name: data.customer_name, customer_email: data.customer_email || null,
-      customer_phone: data.customer_phone, method: data.method, amount_mzn: amount, fee_mzn: fee, net_mzn: net, status: "pending", external_ref: null,
+      customer_phone: data.customer_phone, method: data.method, amount_mzn: amount, fee_mzn: seller_fee, net_mzn: seller_net, status: "pending", external_ref: null,
     }).select().single();
     if (error) throw new Error(error.message);
 
@@ -64,7 +66,7 @@ export const payLink = createServerFn({ method: "POST" })
       await supabaseAdmin.from("transactions").update({ status: "paid", external_ref: `SIM-${Date.now()}` }).eq("id", tx.id);
       await supabaseAdmin.from("payment_links").update({ payments_count: (link.payments_count ?? 0) + 1 }).eq("id", link.id);
       const { data: prof } = await supabaseAdmin.from("profiles").select("balance_mzn").eq("id", link.user_id).maybeSingle();
-      await supabaseAdmin.from("profiles").update({ balance_mzn: Number(prof?.balance_mzn ?? 0) + net }).eq("id", link.user_id);
+      await supabaseAdmin.from("profiles").update({ balance_mzn: Number(prof?.balance_mzn ?? 0) + seller_net }).eq("id", link.user_id);
     }
     return { id: tx.id, status: "pending" };
   });
