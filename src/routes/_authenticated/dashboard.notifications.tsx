@@ -64,7 +64,7 @@ function NotificationsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate({ to: "/dashboard/notifications/config" })} className="gap-1.5">
+          <Button variant="outline" size="sm" onClick={() => navigate({ to: "/dashboard/settings" })} className="gap-1.5">
             <Settings2 className="h-4 w-4" />
             Configurar
           </Button>
