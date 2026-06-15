@@ -140,6 +140,7 @@ export type Database = {
       profiles: {
         Row: {
           account_type: string
+          api_key: string
           balance_mzn: number
           business_name: string | null
           city: string | null
@@ -152,6 +153,7 @@ export type Database = {
         }
         Insert: {
           account_type?: string
+          api_key?: string
           balance_mzn?: number
           business_name?: string | null
           city?: string | null
@@ -164,6 +166,7 @@ export type Database = {
         }
         Update: {
           account_type?: string
+          api_key?: string
           balance_mzn?: number
           business_name?: string | null
           city?: string | null
