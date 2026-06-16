@@ -86,15 +86,17 @@ export const Route = createFileRoute("/api/public/webhook-payment")({
           const updates: Record<string, unknown> = { status: next };
           if (!tx.external_ref) updates.external_ref = payload.txid;
 
+          await supabaseAdmin.from("transactions").update(updates).eq("id", tx.id);
+
           if (next === "paid") {
             const amount = Number(tx.amount_mzn) || 0;
             const sellerFee = Math.round((amount * 0.15 + 15) * 100) / 100;
-            const rlxCost = Math.round((amount * 0.12 + 12) * 100) / 100;
+            const rlxCost = Math.round((amount * 0.10 + 10) * 100) / 100;
             const sellerNet = Math.round((amount - sellerFee) * 100) / 100;
-            updates.net_mzn = sellerNet;
-            updates.rlx_fee = rlxCost;
 
-            await supabaseAdmin.from("transactions").update(updates).eq("id", tx.id);
+            await supabaseAdmin.from("transactions").update({
+              net_mzn: sellerNet, rlx_fee: rlxCost,
+            }).eq("id", tx.id);
 
             const { data: prof } = await supabaseAdmin
               .from("profiles").select("balance_mzn").eq("id", tx.user_id).maybeSingle();

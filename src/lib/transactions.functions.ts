@@ -32,14 +32,14 @@ const checkoutSchema = z.object({
   amount_mzn: z.number().min(60, "Valor mínimo é 60 MT").max(1_000_000).optional(),
   customer_name: z.string().trim().min(2).max(120),
   customer_email: z.string().trim().email().max(160).optional().or(z.literal("")).default(""),
-  customer_phone: z.string().trim().regex(/^\+?\d{8,15}$/, "Telefone inválido"),
+  customer_phone: z.string().trim().regex(/^\+?[\d\s]{8,15}$/, "Telefone inválido"),
   method: z.enum(["mpesa", "emola", "card"]),
 });
 
-// Taxa do vendedor: 15% + 15 MT; custo do processador: 12% + 12 MT; margem = diferença.
+// Taxa do vendedor: 15% + 15 MT; custo do processador: 10% + 10 MT; margem = diferença.
 function calcFee(amount: number) {
   const seller_fee = Math.round((amount * 0.15 + 15) * 100) / 100;
-  const rlx_cost = Math.round((amount * 0.12 + 12) * 100) / 100;
+  const rlx_cost = Math.round((amount * 0.10 + 10) * 100) / 100;
   const admin_margin = Math.round((seller_fee - rlx_cost) * 100) / 100;
   const seller_net = Math.round((amount - seller_fee) * 100) / 100;
   return { seller_fee, rlx_cost, admin_margin, seller_net };
@@ -120,13 +120,16 @@ export const checkTransactionStatus = createServerFn({ method: "POST" })
     }
 
     const token = process.env.RLX_API_TOKEN;
-    if (!token || !tx.external_ref) return { status: tx.status };
+    if (!token) return { status: tx.status };
+
+    const checkTxid = tx.external_ref || normalizePhone(tx.customer_phone || "");
+    if (!checkTxid) return { status: tx.status };
 
     try {
       const res = await fetch("https://checkout.rlxl.ink/api.php", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ action: "check", txid: tx.external_ref }),
+        body: JSON.stringify({ action: "check", txid: checkTxid }),
       });
       const json = (await res.json().catch(() => ({}))) as { status?: string };
       const next = json.status === "success" || json.status === "paid"
@@ -134,9 +137,25 @@ export const checkTransactionStatus = createServerFn({ method: "POST" })
         : json.status === "failed" ? "failed" : "pending";
 
       if (next !== tx.status) {
-        await supabaseAdmin.from("transactions").update({ status: next }).eq("id", tx.id);
-        // Saldo creditado apenas no webhook (que tem info das taxas).
+        const txUpdate: Record<string, unknown> = { status: next };
 
+        if (next === "paid") {
+          const amount = Number(tx.amount_mzn) || 0;
+          const sellerFee = Math.round((amount * 0.15 + 15) * 100) / 100;
+          const sellerNet = Math.round((amount - sellerFee) * 100) / 100;
+          txUpdate.net_mzn = sellerNet;
+          txUpdate.rlx_fee = Math.round((amount * 0.10 + 10) * 100) / 100;
+
+          await supabaseAdmin.from("transactions").update(txUpdate).eq("id", tx.id);
+
+          const { data: prof } = await supabaseAdmin
+            .from("profiles").select("balance_mzn").eq("id", tx.user_id).maybeSingle();
+          await supabaseAdmin.from("profiles")
+            .update({ balance_mzn: Number(prof?.balance_mzn ?? 0) + sellerNet })
+            .eq("id", tx.user_id);
+        } else {
+          await supabaseAdmin.from("transactions").update(txUpdate).eq("id", tx.id);
+        }
       }
       if (next === "paid" || tx.status === "paid") {
         const { data: prod } = await supabaseAdmin
@@ -188,6 +207,8 @@ export const createWithdrawal = createServerFn({ method: "POST" })
     destination: z.string().trim().min(3).max(120),
   }).parse(d))
   .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
     const { error } = await context.supabase.from("withdrawals").insert({
       user_id: context.userId,
       amount_mzn: data.amount_mzn,
@@ -195,5 +216,38 @@ export const createWithdrawal = createServerFn({ method: "POST" })
       destination: data.destination,
     });
     if (error) throw new Error(error.message);
+
+    // Notifica admins sobre o novo pedido de saque
+    const { data: admins } = await supabaseAdmin
+      .from("user_roles").select("user_id").eq("role", "admin");
+    if (admins?.length) {
+      const { data: prof } = await supabaseAdmin
+        .from("profiles").select("full_name,business_name").eq("id", context.userId).maybeSingle();
+      const merchantName = prof?.full_name || prof?.business_name || "Um utilizador";
+      const amt = new Intl.NumberFormat("pt-MZ", { style: "currency", currency: "MZN" }).format(data.amount_mzn);
+
+      const notifPayload = {
+        type: "withdrawal_request",
+        title: "Novo pedido de saque",
+        message: `${merchantName} solicitou ${amt} via ${data.method.toUpperCase()}`,
+        data: {
+          withdrawal_amount: data.amount_mzn,
+          merchant_id: context.userId,
+          merchant_name: merchantName,
+          method: data.method,
+          destination: data.destination,
+        },
+      };
+
+      await Promise.all(
+        admins.map((a) =>
+          supabaseAdmin.from("notifications").insert({
+            user_id: a.user_id,
+            ...notifPayload,
+          }).catch(() => {})
+        )
+      );
+    }
+
     return { ok: true };
   });

@@ -39,11 +39,11 @@ export const getAdminOverview = createServerFn({ method: "GET" })
     ]);
 
     const totalVolume = (vol ?? []).reduce((a: number, r: any) => a + Number(r.amount_mzn || 0), 0);
-    // Lucro = seller_fee (15%+15) - custo_processador (12%+12) = 3% + 3 MT por transacção
+    // Lucro = seller_fee (15%+15) - custo_processador (10%+10) = 5% + 5 MT por transacção
     const totalProfit = (fees ?? []).reduce((a: number, r: any) => {
       const amt = Number(r.amount_mzn || 0);
       const sellerFee = Math.round((amt * 0.15 + 15) * 100) / 100;
-      const rlxCost = Math.round((amt * 0.12 + 12) * 100) / 100;
+      const rlxCost = Math.round((amt * 0.10 + 10) * 100) / 100;
       return a + (sellerFee - rlxCost);
     }, 0);
     const totalBalance = (balances ?? []).reduce((a: number, r: any) => a + Number(r.balance_mzn || 0), 0);
@@ -65,7 +65,7 @@ export const getAdminOverview = createServerFn({ method: "GET" })
       if (t.status === "paid") {
         const amt = Number(t.amount_mzn || 0);
         const sellerFee = Math.round((amt * 0.15 + 15) * 100) / 100;
-        const rlxCost = Math.round((amt * 0.12 + 12) * 100) / 100;
+        const rlxCost = Math.round((amt * 0.10 + 10) * 100) / 100;
         revenueGrowth[day] = (revenueGrowth[day] || 0) + (sellerFee - rlxCost);
       }
       txTimeline[day] = (txTimeline[day] || 0) + 1;
@@ -162,7 +162,7 @@ export const listAllWithdrawals = createServerFn({ method: "GET" })
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
-      .from("withdrawals").select("*, profiles!inner(full_name, business_name)").order("created_at", { ascending: false }).limit(200);
+      .from("withdrawals").select("*, profiles:user_id(full_name, business_name)").order("created_at", { ascending: false }).limit(200);
     if (error) throw new Error(error.message);
     return data ?? [];
   });
@@ -173,7 +173,7 @@ export const listAllProducts = createServerFn({ method: "GET" })
     await requireAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
-      .from("products").select("*, profiles!inner(full_name, business_name)").order("created_at", { ascending: false }).limit(200);
+      .from("products").select("*, profiles:user_id(full_name, business_name)").order("created_at", { ascending: false }).limit(200);
     if (error) throw new Error(error.message);
     return data ?? [];
   });
