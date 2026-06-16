@@ -6,7 +6,7 @@ import { createCheckout, checkTransactionStatus } from "@/lib/transactions.funct
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Lock, Heart, ShieldCheck, AlertTriangle, Smartphone } from "lucide-react";
+import { Loader2, Lock, ShieldCheck, AlertTriangle, Smartphone } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
@@ -28,15 +28,6 @@ function Countdown() {
   return (
     <span className="tabular-nums">{String(m).padStart(2, "0")}:{String(s).padStart(2, "0")}</span>
   );
-}
-
-function PurchaseCounter() {
-  const [count, setCount] = useState(() => Math.floor(Math.random() * 30) + 15);
-  useEffect(() => {
-    const t = setInterval(() => setCount((p) => p + Math.floor(Math.random() * 3)), 8000);
-    return () => clearInterval(t);
-  }, []);
-  return <span>{count}</span>;
 }
 
 function CheckoutPage() {
@@ -245,8 +236,7 @@ function CheckoutPage() {
                   <h1 className="text-base font-extrabold tracking-tight leading-tight text-gray-900 truncate">{product.name}</h1>
                   {product.description && <p className="text-xs text-gray-400 truncate">{product.description}</p>}
                   <div className="flex items-center gap-1 mt-0.5 text-[11px] font-medium" style={{ color: "#3b82f6" }}>
-                    <Heart className="h-3 w-3" fill="#3b82f6" />
-                    <span><PurchaseCounter /> compras</span>
+                    <span className="text-xs">Vendas</span>
                   </div>
                 </div>
               </div>
@@ -256,8 +246,7 @@ function CheckoutPage() {
                 <h1 className="text-base font-extrabold tracking-tight text-gray-900">{product.name}</h1>
                 {product.description && <p className="text-xs text-gray-400 mt-0.5">{product.description}</p>}
                 <div className="flex items-center gap-1 mt-1 text-[11px] font-medium" style={{ color: "#3b82f6" }}>
-                  <Heart className="h-3 w-3" fill="#3b82f6" />
-                  <span><PurchaseCounter /> compras</span>
+                  <span className="text-xs">Vendas</span>
                 </div>
               </div>
             )}
