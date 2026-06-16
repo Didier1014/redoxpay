@@ -207,8 +207,6 @@ export const createWithdrawal = createServerFn({ method: "POST" })
     destination: z.string().trim().min(3).max(120),
   }).parse(d))
   .handler(async ({ data, context }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
     const { error } = await context.supabase.from("withdrawals").insert({
       user_id: context.userId,
       amount_mzn: data.amount_mzn,
@@ -217,37 +215,31 @@ export const createWithdrawal = createServerFn({ method: "POST" })
     });
     if (error) throw new Error(error.message);
 
-    // Notifica admins sobre o novo pedido de saque
-    const { data: admins } = await supabaseAdmin
-      .from("user_roles").select("user_id").eq("role", "admin");
-    if (admins?.length) {
-      const { data: prof } = await supabaseAdmin
-        .from("profiles").select("full_name,business_name").eq("id", context.userId).maybeSingle();
-      const merchantName = prof?.full_name || prof?.business_name || "Um utilizador";
-      const amt = new Intl.NumberFormat("pt-MZ", { style: "currency", currency: "MZN" }).format(data.amount_mzn);
-
-      const notifPayload = {
-        type: "withdrawal_request",
-        title: "Novo pedido de saque",
-        message: `${merchantName} solicitou ${amt} via ${data.method.toUpperCase()}`,
-        data: {
-          withdrawal_amount: data.amount_mzn,
-          merchant_id: context.userId,
-          merchant_name: merchantName,
-          method: data.method,
-          destination: data.destination,
-        },
-      };
-
-      await Promise.all(
-        admins.map((a) =>
-          supabaseAdmin.from("notifications").insert({
-            user_id: a.user_id,
-            ...notifPayload,
-          }).catch(() => {})
-        )
-      );
-    }
+    // Notificação fire-and-forget para admins (nunca bloqueia o saque)
+    import("@/integrations/supabase/client.server").then(({ supabaseAdmin }) => {
+      supabaseAdmin.from("user_roles").select("user_id").eq("role", "admin").then(({ data: admins }) => {
+        if (!admins?.length) return;
+        supabaseAdmin.from("profiles").select("full_name,business_name").eq("id", context.userId).maybeSingle().then(({ data: prof }) => {
+          const merchantName = prof?.full_name || prof?.business_name || "Um utilizador";
+          const amt = new Intl.NumberFormat("pt-MZ", { style: "currency", currency: "MZN" }).format(data.amount_mzn);
+          const notifPayload = {
+            type: "withdrawal_request",
+            title: "Novo pedido de saque",
+            message: `${merchantName} solicitou ${amt} via ${data.method.toUpperCase()}`,
+            data: {
+              withdrawal_amount: data.amount_mzn,
+              merchant_id: context.userId,
+              merchant_name: merchantName,
+              method: data.method,
+              destination: data.destination,
+            },
+          };
+          Promise.all(admins.map((a) =>
+            supabaseAdmin.from("notifications").insert({ user_id: a.user_id, ...notifPayload }).catch(() => {})
+          ));
+        }).catch(() => {});
+      }).catch(() => {});
+    }).catch(() => {});
 
     return { ok: true };
   });

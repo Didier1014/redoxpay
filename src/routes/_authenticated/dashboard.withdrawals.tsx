@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Wallet } from "lucide-react";
+import { Wallet, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard/withdrawals")({
   component: WdPage,
@@ -29,7 +29,7 @@ function WdPage() {
   const m = useMutation({
     mutationFn: () => create({ data: { amount_mzn: Number(amount), method, destination } }),
     onSuccess: () => { toast.success("Saque solicitado!"); setAmount(""); setDestination(""); qc.invalidateQueries({ queryKey: ["stats"] }); },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Erro"),
+    onError: (e) => { console.error("Erro ao solicitar saque:", e); toast.error(e instanceof Error ? e.message : "Erro ao solicitar saque"); },
   });
 
   return (
@@ -64,7 +64,7 @@ function WdPage() {
           <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">{method === "bank" ? "IBAN / NIB" : "Número de telefone"}</Label>
           <Input value={destination} onChange={e=>setDestination(e.target.value)} className="h-12 bg-secondary border-0 rounded-xl" />
         </div>
-        <Button onClick={()=>m.mutate()} disabled={!amount || !destination || m.isPending} className="w-full h-12 rounded-xl bg-foreground text-background">Solicitar saque</Button>
+        <Button onClick={()=>m.mutate()} disabled={!amount || !destination || m.isPending} className="w-full h-12 rounded-xl bg-foreground text-background">{m.isPending ? <><Loader2 className="h-4 w-4 animate-spin" /> A processar…</> : "Solicitar saque"}</Button>
       </Card>
     </div>
   );
